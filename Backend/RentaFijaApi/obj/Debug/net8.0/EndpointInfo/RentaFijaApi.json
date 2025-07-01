@@ -1,0 +1,22 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "RentaFijaApi",
+    "version": "1.0"
+  },
+  "paths": {
+    "/RentaFija/data": {
+      "get": {
+        "tags": [
+          "RentaFija"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": { }
+}

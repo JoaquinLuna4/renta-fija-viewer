@@ -1,0 +1,12 @@
+[
+  {
+    "ContainingType": "RentaFijaController",
+    "Method": "GetRentaFijaData",
+    "RelativePath": "RentaFija/data",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  }
+]
