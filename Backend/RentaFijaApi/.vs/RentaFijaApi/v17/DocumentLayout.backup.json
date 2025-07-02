@@ -7,16 +7,15 @@
       "RelativeMoniker": "D:0:0:{A72E6CCA-E490-46EC-8DCC-CA4DE7FE76D2}|RentaFijaApi.csproj|solutionrelative:services\\pdfextractionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A72E6CCA-E490-46EC-8DCC-CA4DE7FE76D2}|RentaFijaApi.csproj|c:\\users\\usuario\\joaco\\programing\\1_proyectos\\rentafija\\backend\\rentafijaapi\\controllers\\rentafijacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A72E6CCA-E490-46EC-8DCC-CA4DE7FE76D2}|RentaFijaApi.csproj|solutionrelative:controllers\\rentafijacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A72E6CCA-E490-46EC-8DCC-CA4DE7FE76D2}|RentaFijaApi.csproj|c:\\users\\usuario\\joaco\\programing\\1_proyectos\\rentafija\\backend\\rentafijaapi\\dtos\\rentafijaactivo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A72E6CCA-E490-46EC-8DCC-CA4DE7FE76D2}|RentaFijaApi.csproj|solutionrelative:dtos\\rentafijaactivo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A72E6CCA-E490-46EC-8DCC-CA4DE7FE76D2}|RentaFijaApi.csproj|c:\\users\\usuario\\joaco\\programing\\1_proyectos\\rentafija\\backend\\rentafijaapi\\services\\rentafijaservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A72E6CCA-E490-46EC-8DCC-CA4DE7FE76D2}|RentaFijaApi.csproj|solutionrelative:services\\rentafijaservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1CDF01DB-3D73-4294-A380-9AC3D8356A5F}|..\\Utilities.Common\\Utilities.Common.csproj|c:\\users\\usuario\\joaco\\programing\\1_proyectos\\rentafija\\backend\\utilities.common\\valueparsers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A72E6CCA-E490-46EC-8DCC-CA4DE7FE76D2}|RentaFijaApi.csproj|c:\\users\\usuario\\joaco\\programing\\1_proyectos\\rentafija\\backend\\rentafijaapi\\controllers\\rentafijacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A72E6CCA-E490-46EC-8DCC-CA4DE7FE76D2}|RentaFijaApi.csproj|solutionrelative:controllers\\rentafijacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A72E6CCA-E490-46EC-8DCC-CA4DE7FE76D2}|RentaFijaApi.csproj|c:\\users\\usuario\\joaco\\programing\\1_proyectos\\rentafija\\backend\\rentafijaapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -30,7 +29,7 @@
       "DocumentGroups": [
         {
           "DockedHeight": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -46,46 +45,46 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "RentaFijaActivo.cs",
-              "DocumentMoniker": "C:\\Users\\Usuario\\JOACO\\Programing\\1_PROYECTOS\\RentaFija\\Backend\\RentaFijaApi\\DTOs\\RentaFijaActivo.cs",
-              "RelativeDocumentMoniker": "DTOs\\RentaFijaActivo.cs",
-              "ToolTip": "C:\\Users\\Usuario\\JOACO\\Programing\\1_PROYECTOS\\RentaFija\\Backend\\RentaFijaApi\\DTOs\\RentaFijaActivo.cs",
-              "RelativeToolTip": "DTOs\\RentaFijaActivo.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAwAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-01T21:46:18.042Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
               "Title": "PdfExtractionService.cs",
               "DocumentMoniker": "C:\\Users\\Usuario\\JOACO\\Programing\\1_PROYECTOS\\RentaFija\\Backend\\RentaFijaApi\\Services\\PdfExtractionService.cs",
               "RelativeDocumentMoniker": "Services\\PdfExtractionService.cs",
-              "ToolTip": "C:\\Users\\Usuario\\JOACO\\Programing\\1_PROYECTOS\\RentaFija\\Backend\\RentaFijaApi\\Services\\PdfExtractionService.cs*",
-              "RelativeToolTip": "Services\\PdfExtractionService.cs*",
-              "ViewState": "AgIAAEQAAAAAAAAAAAAuwFQAAAAqAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\Usuario\\JOACO\\Programing\\1_PROYECTOS\\RentaFija\\Backend\\RentaFijaApi\\Services\\PdfExtractionService.cs",
+              "RelativeToolTip": "Services\\PdfExtractionService.cs",
+              "ViewState": "AgIAAMoAAAAAAAAAAAAgwPIAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-01T21:09:12.525Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
+              "Title": "ValueParsers.cs",
+              "DocumentMoniker": "C:\\Users\\Usuario\\JOACO\\Programing\\1_PROYECTOS\\RentaFija\\Backend\\Utilities.Common\\ValueParsers.cs",
+              "RelativeDocumentMoniker": "..\\Utilities.Common\\ValueParsers.cs",
+              "ToolTip": "C:\\Users\\Usuario\\JOACO\\Programing\\1_PROYECTOS\\RentaFija\\Backend\\Utilities.Common\\ValueParsers.cs",
+              "RelativeToolTip": "..\\Utilities.Common\\ValueParsers.cs",
+              "ViewState": "AgIAADsAAAAAAAAAAAAwwFUAAABAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-01T23:04:48.818Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "RentaFijaService.cs",
               "DocumentMoniker": "C:\\Users\\Usuario\\JOACO\\Programing\\1_PROYECTOS\\RentaFija\\Backend\\RentaFijaApi\\Services\\RentaFijaService.cs",
               "RelativeDocumentMoniker": "Services\\RentaFijaService.cs",
               "ToolTip": "C:\\Users\\Usuario\\JOACO\\Programing\\1_PROYECTOS\\RentaFija\\Backend\\RentaFijaApi\\Services\\RentaFijaService.cs",
               "RelativeToolTip": "Services\\RentaFijaService.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAABMAAAAAAAAAAAAgwBYAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-01T19:33:11.54Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "RentaFijaController.cs",
               "DocumentMoniker": "C:\\Users\\Usuario\\JOACO\\Programing\\1_PROYECTOS\\RentaFija\\Backend\\RentaFijaApi\\Controllers\\RentaFijaController.cs",
               "RelativeDocumentMoniker": "Controllers\\RentaFijaController.cs",
@@ -93,8 +92,7 @@
               "RelativeToolTip": "Controllers\\RentaFijaController.cs",
               "ViewState": "AgIAACoAAAAAAAAAAAAowDoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-01T13:41:09.321Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-01T13:41:09.321Z"
             },
             {
               "$type": "Document",
@@ -106,8 +104,7 @@
               "RelativeToolTip": "Program.cs",
               "ViewState": "AgIAAAQAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-01T13:44:17.914Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-01T13:44:17.914Z"
             }
           ]
         }

@@ -42,3 +42,6 @@ C:\Users\Usuario\JOACO\Programing\1_PROYECTOS\RentaFija\Backend\RentaFijaApi\obj
 C:\Users\Usuario\JOACO\Programing\1_PROYECTOS\RentaFija\Backend\RentaFijaApi\obj\Debug\net8.0\RentaFijaApi.pdb
 C:\Users\Usuario\JOACO\Programing\1_PROYECTOS\RentaFija\Backend\RentaFijaApi\obj\Debug\net8.0\RentaFijaApi.genruntimeconfig.cache
 C:\Users\Usuario\JOACO\Programing\1_PROYECTOS\RentaFija\Backend\RentaFijaApi\obj\Debug\net8.0\ref\RentaFijaApi.dll
+C:\Users\Usuario\JOACO\Programing\1_PROYECTOS\RentaFija\Backend\RentaFijaApi\obj\Debug\net8.0\RentaFijaApi.sourcelink.json
+C:\Users\Usuario\JOACO\Programing\1_PROYECTOS\RentaFija\Backend\RentaFijaApi\bin\Debug\net8.0\Utilities.Common.dll
+C:\Users\Usuario\JOACO\Programing\1_PROYECTOS\RentaFija\Backend\RentaFijaApi\bin\Debug\net8.0\Utilities.Common.pdb
