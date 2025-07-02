@@ -1,71 +1,26 @@
-# Visual Studio 2015 onwards
+# Visual Studio
 .vs/
+*.vspscc
+*.vssscc
+*.suo
+*.user
+*.useros
 
 # Build results
 [Dd]ebug/
 [Rr]elease/
 [Bb]in/
 [Oo]bj/
-[Oo]ut/
-build/
-Build/
-*.log
-*.tlog
-*.lock.json
+*.dll
+*.exe
+*.pdb # Archivos de símbolos de depuración
+*.tlb
+*.lib
+*.obj
 
-# Packages
-packages/
-*.nupkg
-project.lock.json
-
-# Rider
-.idea/
-
-# Visual Studio Code
-.vscode/
-
-# ReSharper
-*.dotSettings
-*.user
-_ReSharper*/
-
-# NUGET
-.nuget/
-*.suo
-*.user
-*.pdb
-*.kml
-*.saf
-*.sd
-*.bak
+# Caches
 *.cache
-*.db
-*.ds_store
-*.vssscc
-*.vspscc
-*.vshost.*
+*/cache/ # Para carpetas llamadas 'cache' en cualquier directorio
 
-# Test Results
-TestResults/
-*.trx
-*.coverage
-*.coveragexml
 
-# Editor Folders and Files
-_UpgradeReport_Files/
-UpgradeLog.xml
-
-# Misc
-[Bb]ackup/
-[Tt]emp/
-[Tt]humbs/
-*.[Cc]ache
-*.orig
-*.swp
-*.swo
-
-# OS Generated Files
-.DS_Store
-.Trashes
-ehthumbs.db
-Thumbs.db
+*.txt
