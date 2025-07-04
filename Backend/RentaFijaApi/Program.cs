@@ -17,6 +17,25 @@ builder.Services.AddHttpClient<RentaFijaService>(); // HttpClient será inyectado
 
 // Registrar Service para EXTRAER PDF
 builder.Services.AddScoped<IPdfExtractionService, PdfExtractionService>();
+
+// --- SECCIÓN CLAVE DE CONFIGURACIÓN DE GEMINI ---
+
+// Registrar Service para llamar a la API de Gemini
+var useGeminiSimulation = builder.Configuration.GetValue<bool>("Gemini:UseSimulation");
+Console.WriteLine($"[DEBUG - Program.cs] useGeminiSimulation leído: {useGeminiSimulation}");
+
+var geminiApiKey = builder.Configuration["Gemini:ApiKey"]; // Lee la clave de configuración
+var geminiApiUrl = builder.Configuration["Gemini:ApiUrl"]; // Lee la URL base de configuración
+builder.Services.AddHttpClient<IGeminiApiService, GeminiApiService>(); // Para que el HttpClient se inyecte
+builder.Services.AddSingleton<IGeminiApiService>(sp =>
+{
+    
+    var httpClient = sp.GetRequiredService<HttpClient>();
+    return new GeminiApiService(httpClient, geminiApiKey, geminiApiUrl, useGeminiSimulation);
+}
+);
+// --- FIN DE LA SECCIÓN DE CONFIGURACIÓN DE GEMINI ---
+
 // Configurar CORS para permitir que tu frontend de React acceda a la API
 builder.Services.AddCors(options =>
 {

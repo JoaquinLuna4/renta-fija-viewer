@@ -14,21 +14,22 @@ public class RentaFijaService
     private readonly IPdfExtractionService _pdfExtractionService;
     private readonly string _iamcReportsBaseUrl = "https://www.iamc.com.ar/Informe/";
     private readonly string _pdfFileName = "InformeDiarioIAMC.pdf"; // Nombre de archivo temporal
-
-    public RentaFijaService(HttpClient httpClient, IPdfExtractionService pdfExtractionService)
+    private readonly IGeminiApiService _geminiApiService; 
+    public RentaFijaService(HttpClient httpClient, IPdfExtractionService pdfExtractionService, IGeminiApiService geminiApiService)
     {
         _httpClient = httpClient;
         _pdfExtractionService = pdfExtractionService;
+        _geminiApiService = geminiApiService;
     }
 
     // Este método ahora se encargará de encontrar la URL del PDF dentro de la página del informe
-    public async Task<string> FindPdfUrlFromDailyReportPageAsync(string date)
+    public async Task<string> FindPdfUrlFromDailyReportPageAsync()
     {
 
         // Construye la URL del informe diario basada en la fecha
         // Formato: InformeRentaFijaDDMMYY (ej. InformeRentaFija280625)
         //string datePart = date.ToString("ddMMyy");
-        string dateSure = "240625";
+        string dateSure = "040725";
         string reportUrl = $"{_iamcReportsBaseUrl}InformeRentaFija{dateSure}/";
 
 
@@ -125,198 +126,52 @@ public class RentaFijaService
         }
     }
 
-    public List<RentaFijaActivo> ExtractRentaFijaData(string pdfFilePath)
+    
+    public async Task<List<RentaFijaActivo>> GetRentaFijaDataForTodayAsync()
     {
-        // Esta línea ahora debería funcionar porque _pdfExtractionService ya no será null
-        return _pdfExtractionService.ExtractRentaFijaData(pdfFilePath);
+        Console.WriteLine($"[DEBUG] Iniciando proceso de extracción de datos ");
+
+        // 1. Encontrar la URL del PDF
+        string pdfPageUrl = await FindPdfUrlFromDailyReportPageAsync();
+        if (string.IsNullOrEmpty(pdfPageUrl))
+        {
+            Console.WriteLine("No se pudo encontrar la URL del PDF. Abortando extracción.");
+            return new List<RentaFijaActivo>();
+        }
+
+        // 2. Descargar el PDF
+        string pdfFilePath = await DownloadPdfAsync(pdfPageUrl);
+        if (string.IsNullOrEmpty(pdfFilePath))
+        {
+            Console.WriteLine("No se pudo descargar el PDF. Abortando extracción.");
+            return new List<RentaFijaActivo>();
+        }
+
+        // 3. Extraer el texto completo del PDF usando PdfExtractionService
+        Console.WriteLine($"[DEBUG] Extrayendo texto completo del PDF: {pdfFilePath}");
+        string fullPdfText = _pdfExtractionService.ExtractFullTextFromPdf(pdfFilePath);
+
+        // 4. Enviar el texto a Gemini para la extracción inteligente de los datos
+        Console.WriteLine("[DEBUG] Enviando texto a Gemini para interpretación.");
+        List<RentaFijaActivo> activos = await _geminiApiService.ExtractRentaFijaDataFromTextAsync(fullPdfText);
+
+        // Opcional: Eliminar el archivo PDF temporal después de procesar
+        try
+        {
+            if (File.Exists(pdfFilePath))
+            {
+                File.Delete(pdfFilePath);
+                Console.WriteLine($"[DEBUG] Archivo PDF temporal eliminado: {pdfFilePath}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] No se pudo eliminar el archivo PDF temporal {pdfFilePath}: {ex.Message}");
+        }
+
+        Console.WriteLine($"[DEBUG] Proceso de extracción finalizado. Se encontraron {activos.Count} activos.");
+        return activos;
     }
 
 }
 
-
-
-
-//    public List<RentaFijaActivo> ExtractRentaFijaData(string pdfFilePath)
-//    {
-//        var data = new List<Dictionary<string, string>>();
-//        var assets = new List<RentaFijaActivo>();
-
-//        if (!File.Exists(pdfFilePath))
-//        {
-//            Console.WriteLine("El archivo PDF no existe en la ruta especificada.");
-//            return assets;
-//        }
-
-//        try
-//        {
-//            using (PdfDocument document = PdfDocument.Open(pdfFilePath))
-//            {
-//                Page page = document.GetPage(3); //Obtenemos la pagina 3
-//                Console.WriteLine($"\n--- Procesando Página {page.Number} ---");
-
-//                var words = page.GetWords().OrderBy(w => w.BoundingBox.Bottom)
-//                                                  .ThenBy(w => w.BoundingBox.Left)
-//                                                  .ToList();
-
-
-
-
-
-//                // TEMPORAL: IMPRIME LAS PALABRAS CON SUS COORDENADAS PARA LA DEPURACIÓN
-//                Console.WriteLine("\n--- Palabras y Coordenadas en Página 3 ---");
-//                foreach (var word in words)
-//                {
-//                    Console.WriteLine($"'{word.Text}' [X:{word.BoundingBox.Left:F2}, Y:{word.BoundingBox.Bottom:F2}, W:{word.BoundingBox.Width:F2}, H:{word.BoundingBox.Height:F2}]");
-//                }
-//                Console.WriteLine("-------------------------------------------");
-
-
-
-
-
-//                var columnXRanges = new Dictionary<string, (double minX, double maxX)>
-//{
-//    { "NombreCompleto", (17.0, 110.0) },
-//    { "CodigoTicker", (150.0, 180.0) },
-//    { "Vencimiento", (195.0, 240.0) },
-//    { "Cotizacion", (465.0, 500.0) },
-//    { "FechaUltimaCotizacion", (520.0, 560.0) }, // ¡NUEVO! Rango para la fecha de última cotización
-//    { "TirAnual", (835.0, 870.0) },
-//    { "Paridad", (790.0, 825.0) }
-//};
-
-//                // Agrupamos palabras por líneas, con una tolerancia para palabras ligeramente desalineadas en Y
-//                // Puedes ajustar el 'lineTolerance' si las palabras de la misma línea tienen Y muy diferentes.
-//                double lineTolerance = 5; // Pixels
-//                var linesOfWords = words.GroupBy(w => (int)(w.BoundingBox.Bottom / lineTolerance))
-//                                        .OrderByDescending(g => g.Key) // Ordenar por Y de abajo hacia arriba (líneas de datos primero)
-//                                        .ToList();
-
-
-//                RentaFijaActivo currentAsset = null;
-//                foreach (var lineGroup in linesOfWords)
-//                {
-//                    // Ordena las palabras dentro de cada línea por su posición X
-//                    var lineWords = lineGroup.OrderBy(w => w.BoundingBox.Left).ToList();
-
-//                    // Intentar identificar un nuevo activo basándose en el ticker o el nombre.
-//                    // Busca el ticker en una posición X esperada.
-//                    var tickerWord = lineWords.FirstOrDefault(w => w.BoundingBox.Left >= columnXRanges["CodigoTicker"].minX &&
-//                                                                   w.BoundingBox.Left <= columnXRanges["CodigoTicker"].maxX &&
-//                                                                   Regex.IsMatch(w.Text, @"^[A-Z]{2,5}\d{2,3}D?$", RegexOptions.IgnoreCase)); // Regex para un ticker típico
-
-//                    if (tickerWord != null)
-//                    {
-//                        if (currentAsset != null)
-//                        {
-//                            assets.Add(currentAsset);
-//                        }
-//                        currentAsset = new RentaFijaActivo();
-//                        currentAsset.CodigoTicker = tickerWord.Text.Trim();
-
-//                        // Intentar capturar el NombreCompleto antes o en la misma línea
-//                        var nombreCompletoWords = lineWords.Where(w => w.BoundingBox.Left >= columnXRanges["NombreCompleto"].minX &&
-//                                                                       w.BoundingBox.Left <= columnXRanges["NombreCompleto"].maxX &&
-//                                                                       w.Text != currentAsset.CodigoTicker) // Excluir el propio ticker
-//                                                          .Select(w => w.Text)
-//                                                          .ToList();
-//                        currentAsset.NombreCompleto = string.Join(" ", nombreCompletoWords).Trim();
-
-//                        // Asignar TipoActivo basado en el nombre o ticker para el filtro
-//                        if (currentAsset.CodigoTicker.StartsWith("TX", StringComparison.OrdinalIgnoreCase) || currentAsset.NombreCompleto.Contains("BONTE", StringComparison.OrdinalIgnoreCase))
-//                        {
-//                            currentAsset.TipoActivo = "BONTE";
-//                        }
-//                        else if (currentAsset.CodigoTicker.StartsWith("AL", StringComparison.OrdinalIgnoreCase) ||
-//                                 currentAsset.CodigoTicker.StartsWith("GD", StringComparison.OrdinalIgnoreCase) ||
-//                                 currentAsset.NombreCompleto.Contains("BONAR", StringComparison.OrdinalIgnoreCase) ||
-//                                 currentAsset.NombreCompleto.Contains("GLOBAL", StringComparison.OrdinalIgnoreCase))
-//                        {
-//                            currentAsset.TipoActivo = "BONAR";
-//                        }
-//                        else if (currentAsset.NombreCompleto.Contains("BONOS DE CONSOLIDACION", StringComparison.OrdinalIgnoreCase))
-//                        {
-//                            currentAsset.TipoActivo = "BONOS DE CONSOLIDACIÓN";
-//                        }
-//                        else if (currentAsset.CodigoTicker.StartsWith("S", StringComparison.OrdinalIgnoreCase) && currentAsset.NombreCompleto.Contains("LECAP", StringComparison.OrdinalIgnoreCase))
-//                        {
-//                            currentAsset.TipoActivo = "LECAP";
-//                        }
-//                        else if (currentAsset.NombreCompleto.Contains("BOPREAL", StringComparison.OrdinalIgnoreCase)) // Añadido para BOPREAL
-//                        {
-//                            currentAsset.TipoActivo = "BOPREAL";
-//                        }
-//                        else
-//                        {
-//                            currentAsset.TipoActivo = "Otro";
-//                        }
-
-//                        // Debug: para ver qué tipo de activo se está identificando
-//                        // Console.WriteLine($"[DEBUG] Activo detectado: {currentAsset.NombreCompleto} ({currentAsset.CodigoTicker}) - Tipo: {currentAsset.TipoActivo}");
-//                    }
-
-//                    if (currentAsset != null)
-//                    {
-//                        // Llenar propiedades de currentAsset para Vencimiento, Cotizacion, TIR Anual, Paridad
-//                        // Recolectar todas las palabras en el rango de X para cada columna
-//                        var vencimientoWords = lineWords.Where(w => w.BoundingBox.Left >= columnXRanges["Vencimiento"].minX && w.BoundingBox.Left <= columnXRanges["Vencimiento"].maxX)
-//                                                        .Select(w => w.Text);
-//                        currentAsset.Vencimiento = string.Join(" ", vencimientoWords).Trim(); // Captura todas las palabras de la columna de vencimiento
-
-
-//                        // Para valores numéricos, recolecta y luego intenta parsear
-//                        var cotizacionCandidateWords = lineWords.Where(w => w.BoundingBox.Left >= columnXRanges["Cotizacion"].minX && w.BoundingBox.Left <= columnXRanges["Cotizacion"].maxX)
-//                                                                .Select(w => w.Text);
-//                        string cotizacionString = string.Join("", cotizacionCandidateWords).Trim(); // Une las palabras para el parseo
-//                        decimal parsedCotizacion;
-//                        // Usamos NumberStyles.Any para flexibilizar la lectura, e InvariantCulture para evitar problemas con comas/puntos.
-//                        // Reemplazamos coma por punto para el parseo si es necesario
-//                        cotizacionString = cotizacionString.Replace(",", ".");
-//                        if (decimal.TryParse(cotizacionString, NumberStyles.Any, CultureInfo.InvariantCulture, out parsedCotizacion))
-//                        {
-//                            currentAsset.Cotizacion = parsedCotizacion;
-//                        }
-//                        var tirAnualCandidateWords = lineWords.Where(w => w.BoundingBox.Left >= columnXRanges["TirAnual"].minX && w.BoundingBox.Left <= columnXRanges["TirAnual"].maxX)
-//                                                              .Select(w => w.Text);
-//                        string tirAnualString = string.Join("", tirAnualCandidateWords).Trim().Replace("%", "");
-//                        decimal parsedTirAnual;
-//                        tirAnualString = tirAnualString.Replace(",", ".");
-//                        if (decimal.TryParse(tirAnualString, NumberStyles.Any, CultureInfo.InvariantCulture, out parsedTirAnual))
-//                        {
-//                            currentAsset.TirAnual = parsedTirAnual;
-//                        }
-
-//                        var paridadCandidateWords = lineWords.Where(w => w.BoundingBox.Left >= columnXRanges["Paridad"].minX && w.BoundingBox.Left <= columnXRanges["Paridad"].maxX)
-//                                                             .Select(w => w.Text);
-//                        string paridadString = string.Join("", paridadCandidateWords).Trim().Replace("%", "");
-//                        decimal parsedParidad;
-//                        paridadString = paridadString.Replace(",", ".");
-//                        if (decimal.TryParse(paridadString, NumberStyles.Any, CultureInfo.InvariantCulture, out parsedParidad))
-//                        {
-//                            currentAsset.Paridad = parsedParidad;
-//                        }
-//                    }
-//                }
-//                // Agrega el último activo procesado de la página
-//                if (currentAsset != null)
-//                {
-//                    assets.Add(currentAsset);
-//                }
-//            } // Fin del using (PdfDocument document)
-
-//        }
-//        catch (Exception ex)
-//        {
-//            Console.WriteLine($"Error general al extraer datos del PDF: {ex.Message}");
-//        }
-//        // --- FILTRADO FINAL DESPUÉS DE LA EXTRACCIÓN ---
-//        var filteredAssets = assets.Where(a =>
-//                a.TipoActivo == "BONTE" ||
-//                a.TipoActivo == "BONAR" ||
-//                a.TipoActivo == "BONOS DE CONSOLIDACIÓN"
-//            ).ToList();
-
-//        Console.WriteLine($"[DEBUG] Activos filtrados encontrados: {filteredAssets.Count}");
-//        return filteredAssets;
-//    }
-//}

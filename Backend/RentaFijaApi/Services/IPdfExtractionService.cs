@@ -1,9 +1,8 @@
 ﻿using RentaFijaApi.DTOs;
 
-namespace RentaFijaApi.Services // Ajusta tu namespace si es diferente
-{
+namespace RentaFijaApi.Services{
     public interface IPdfExtractionService
     {
-        List<RentaFijaActivo> ExtractRentaFijaData(string pdfFilePath);
+        string ExtractFullTextFromPdf(string pdfFilePath);
     }
 }

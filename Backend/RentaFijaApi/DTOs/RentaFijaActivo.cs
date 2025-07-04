@@ -1,28 +1,29 @@
-﻿namespace RentaFijaApi.DTOs
+﻿using System;
+using System.Text.Json.Serialization; // ¡Este using es crucial!
+
+namespace RentaFijaApi.DTOs // Verifica que este sea el namespace correcto
 {
     public class RentaFijaActivo
     {
-        public string TipoActivo { get; set; } // Ej: "BONTE", "BONAR", "LECAP", "BOPREAL", "ON", "BONOS DE CONSOLIDACIÓN"
-        public string NombreCompleto { get; set; } // Nombre largo del activo, ej. "BONAR STEP-UP USD Ley Arg 2029"
-        public string CodigoTicker { get; set; } // El código corto, ej. "AL29", "GD30", "TX26"
-        public string Vencimiento { get; set; } // Podría ser DateTime si lo parseas
-        //public string Moneda { get; set; } // ARS, USD, etc. (Si lo extraes)
-        //public string Clase { get; set; } // Ley Arg, Ley NY, etc. (Si lo extraes)
-        public decimal? Cotizacion { get; set; } // Usamos decimal? para permitir nulos si no siempre está presente
-        public decimal? TirAnual { get; set; } // Rendimiento Anual
-        public decimal? Paridad { get; set; } // Paridad
-        public DateTime? FechaUltimaCotizacion { get; set; } // Ultima cotizacion
+        public string? NombreCompleto { get; set; }
+        [JsonPropertyName("Ticker")]
+        public string? CodigoTicker { get; set; } // O simplemente 'Ticker' si prefieres ese nombre en C#
 
-        // Puedes agregar más campos según lo que necesites del PDF
-        // Por ejemplo: Duracion, Tasa, FrecuenciaPago, etc.
+        [JsonPropertyName("Vencimiento")]
+        public string? Vencimiento { get; set; } // Considera usar DateTime? si el formato de fecha es consistente
 
-        // Constructor vacío, útil para la deserialización y creación de objetos
-        public RentaFijaActivo() { }
+        [JsonPropertyName("Cotización")] // Mapea el campo del JSON con tilde
+        public double? Cotizacion { get; set; } // Nombre en C# sin tilde, más estándar
 
-        // Opcional: Un método ToString() para facilitar la depuración y ver el objeto en consola
-        public override string ToString()
-        {
-            return $"Tipo: {TipoActivo ?? "N/A"}, Ticker: {CodigoTicker ?? "N/A"}, Nombre: {NombreCompleto ?? "N/A"}, Vto: {Vencimiento ?? "N/A"}, Cotiz: {Cotizacion?.ToString("F2") ?? "N/A"}, TIR: {TirAnual?.ToString("F2") ?? "N/A"}%, Paridad: {Paridad?.ToString("F2") ?? "N/A"}%";
-        }
+        [JsonPropertyName("TIR Anual")] // Mapea el campo del JSON con espacio
+        public double? TirAnual { get; set; } // Nombre en C# en camelCase, más estándar
+
+        [JsonPropertyName("Paridad")]
+        public double? Paridad { get; set; }
+
+        // Estos campos pueden permanecer, pero seguirán siendo null si Gemini no los envía
+        public string? TipoActivo { get; set; }
+        [JsonPropertyName("Fecha Ultima Cotizacion")]
+        public string? FechaUltimaCotizacion { get; set; }
     }
 }
