@@ -41,27 +41,26 @@ namespace RentaFijaApi.Services
         {
             // 2. Preparar el prompt para Gemini
             string geminiPrompt = $@"Eres un asistente experto en análisis financiero y extracción de datos de informes de renta fija. Tu tarea es analizar el siguiente texto de un informe y extraer la información de los activos listados en las tablas,
-específicamente para la sección de 'Renta Fija'. Solo debes analizar y extraer los datos de la hoja 2.
+                                    específicamente para la sección de 'Renta Fija'. Solo debes analizar y extraer los datos de la hoja 2.
 
-Para cada activo que encuentres, necesito los siguientes campos:
-- **NombreCompleto**: El nombre completo del bono, que usualmente se encuentra a la izquierda del Ticker. En el documento figura en la columna BONO.
-- **Ticker:** El código de identificación del activo (ej. 'T2X5', 'PNDCO').
-- **Vencimiento:** La fecha de vencimiento del activo en formato AAAA-MM-DD (ej. '2025-05-23').
-- **Cotización:** El precio de cotización del activo. Debe ser un número decimal, sin símbolos de moneda.
-- **Fecha de ultima Cotización:** La fecha de la ultima cotizacion del activo. Debe ser una fecha en formato AAAA-MM-DD. No uses formatos como d-Mmm-yy. Si la fecha es '1-Jul-25', conviértela a '2025-07-01'.
-- **TIR Anual:** La Tasa Interna de Retorno anual, **que se encuentra bajo la columna 'TIR ANUAL' en el documento**. Debe ser un número decimal, sin el símbolo '%'. Generalmente se encuentra a la derecha de Paridad.
-- **Paridad:** La paridad del activo, **que se encuentra bajo la columna 'PARIDAD' en el documento**. Debe ser un número decimal, sin el símbolo '%'.
+                                    Para cada activo que encuentres, necesito los siguientes campos:
+                                    - **NombreCompleto**: El nombre completo del bono, que usualmente se encuentra a la izquierda del Ticker. En el documento figura en la columna BONO.
+                                    - **Ticker:** El código de identificación del activo (ej. 'T2X5', 'PNDCO').
+                                    - **Vencimiento:** La fecha de vencimiento del activo en formato AAAA-MM-DD (ej. '2025-05-23').
+                                    - **Cotización:** El precio de cotización del activo. Debe ser un número decimal, sin símbolos de moneda.
+                                    - **TIR Anual:** La Tasa Interna de Retorno anual, **que se encuentra bajo la columna 'TIR ANUAL' en el documento**. Debe ser un número decimal, sin el símbolo '%'. Generalmente se encuentra a la derecha de Paridad.
+                                    - **Paridad:** La paridad del activo, **que se encuentra bajo la columna 'PARIDAD' en el documento**. Debe ser un número decimal, sin el símbolo '%'.
 
-Si un campo no se encuentra para un activo específico, por favor, devuélvelo como `null`.
-Asegúrate de que todos los valores numéricos usen el punto como separador decimal.
+                                    Si un campo no se encuentra para un activo específico, por favor, devuélvelo como `null`.
+                                    Asegúrate de que todos los valores numéricos usen el punto como separador decimal.
 
-La respuesta DEBE ser SOLAMENTE el array de objetos JSON. No incluyas ningún texto introductorio, explicaciones, ni bloques de código Markdown (```).
+                                    La respuesta DEBE ser SOLAMENTE el array de objetos JSON. No incluyas ningún texto introductorio, explicaciones, ni bloques de código Markdown (```). Un maximo de 50 activos.
 
----
+                                    ---
 
-Texto del Informe:
-{reportTextContent}
-";
+                                    Texto del Informe:
+                                    {reportTextContent}
+                                    ";
 
             // 3. Llamar a la API de Gemini
             string jsonResponse = string.Empty;
@@ -106,7 +105,7 @@ Texto del Informe:
                     HttpResponseMessage response = await _httpClient.PostAsync(fullApiUrl, content);
                     response.EnsureSuccessStatusCode(); // Lanza excepción si la respuesta no es 2xx
 
-                     apiResponse = await response.Content.ReadAsStringAsync();
+                    apiResponse = await response.Content.ReadAsStringAsync();
 
                     var geminiRootResponse = JsonSerializer.Deserialize<GeminiRootResponse>(apiResponse, _jsonSerializerOptions);
 
@@ -123,46 +122,54 @@ Texto del Informe:
                         return new List<RentaFijaActivo>();
                     }
 
-                    // Ahora, limpia la cadena JSON extraída de las envolturas de Markdown
-                    string cleanedJsonResponse = rawExtractedJson;
-
-            // ------------------- Codigo para eliminar la envoltura de la respuesta de Gemini--------------------\\
-
-                    // Primero, elimina el inicio del bloque de código Markdown (```json) si existe
-                    if (cleanedJsonResponse.StartsWith("```json", StringComparison.OrdinalIgnoreCase))
+                    if (rawExtractedJson != null)
                     {
-                        cleanedJsonResponse = cleanedJsonResponse.Substring("```json".Length);
+                        string cleanedJsonResponse = rawExtractedJson;
+
+
+                        // Ahora, limpia la cadena JSON extraída de las envolturas de Markdown
+
+                        // ------------------- Codigo para eliminar la envoltura de la respuesta de Gemini--------------------\\
+
+                        // Primero, elimina el inicio del bloque de código Markdown (```json) si existe
+                        if (cleanedJsonResponse.StartsWith("```json", StringComparison.OrdinalIgnoreCase))
+                        {
+                            cleanedJsonResponse = cleanedJsonResponse.Substring("```json".Length);
+                        }
+
+                        // *** ¡NUEVA LÓGICA DE LIMPIEZA MÁS ROBUSTA PARA EL FINAL! ***
+                        // Busca el último carácter ']' que indica el final del array JSON.
+                        int lastBracketIndex = cleanedJsonResponse.LastIndexOf(']');
+                        if (lastBracketIndex != -1)
+                        {
+                            // Si encuentra un ']', toma la subcadena hasta (e incluyendo) ese corchete.
+                            // Esto descarta cualquier cosa después del JSON válido, incluyendo los '```' y saltos de línea.
+                            cleanedJsonResponse = cleanedJsonResponse.Substring(0, lastBracketIndex + 1);
+                        }
+
+                        cleanedJsonResponse = cleanedJsonResponse.Trim(); // Elimina cualquier espacio en blanco, saltos de línea, etc. al principio o final
+
+                        Console.WriteLine($"[DEBUG] JSON de Gemini recibido (limpio final para deserialización): {cleanedJsonResponse}");
+
+                        jsonResponse = cleanedJsonResponse; // Asigna el JSON limpio para la deserialización final
+                                                            // ------------------- FIN código para eliminar la envoltura de la respuesta ------------------- \\
+
                     }
-
-                    // *** ¡NUEVA LÓGICA DE LIMPIEZA MÁS ROBUSTA PARA EL FINAL! ***
-                    // Busca el último carácter ']' que indica el final del array JSON.
-                    int lastBracketIndex = cleanedJsonResponse.LastIndexOf(']');
-                    if (lastBracketIndex != -1)
-                    {
-                        // Si encuentra un ']', toma la subcadena hasta (e incluyendo) ese corchete.
-                        // Esto descarta cualquier cosa después del JSON válido, incluyendo los '```' y saltos de línea.
-                        cleanedJsonResponse = cleanedJsonResponse.Substring(0, lastBracketIndex + 1);
                     }
-
-                    cleanedJsonResponse = cleanedJsonResponse.Trim(); // Elimina cualquier espacio en blanco, saltos de línea, etc. al principio o final
-
-                    Console.WriteLine($"[DEBUG] JSON de Gemini recibido (limpio final para deserialización): {cleanedJsonResponse}");
-
-                    jsonResponse = cleanedJsonResponse; // Asigna el JSON limpio para la deserialización final
-                // ------------------- FIN código para eliminar la envoltura de la respuesta ------------------- \\
-
-                }
                 catch (HttpRequestException ex)
                 {
                     Console.WriteLine($"Error HTTP al llamar a la API de Gemini: {ex.Message}");
                     throw; // Vuelve a lanzar la excepción para propagar el error
                 }
-                catch (JsonException ex)
+                catch (System.Text.Json.JsonException ex)
                 {
-                    Console.WriteLine($"Error al deserializar la respuesta RAW de Gemini: {ex.Message}");
+                    // Este catch es CRUCIAL para el error de JSON truncado o malformado
+                    Console.WriteLine($"[ERROR] Error de deserialización JSON: {ex.Message}");
+                    Console.WriteLine($"[DEBUG] JSON que causó el error (posiblemente truncado):\n{jsonResponse}");
                     Console.WriteLine($"JSON recibido (problema de deserialización RAW): {apiResponse}"); // Registra el JSON original problemático
-                    throw;
+                    throw new ApplicationException("No se pudo procesar la respuesta de la IA. El formato JSON es inválido o está incompleto.", ex);
                 }
+
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error inesperado en la llamada a la API de Gemini: {ex.Message}");

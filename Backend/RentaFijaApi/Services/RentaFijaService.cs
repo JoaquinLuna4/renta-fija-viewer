@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using RentaFijaApi.DTOs;
 using RentaFijaApi.Services;
+using System.Text.Json;
 public class RentaFijaService
 {
     private readonly HttpClient _httpClient;
@@ -23,73 +24,117 @@ public class RentaFijaService
     }
 
     // Este método ahora se encargará de encontrar la URL del PDF dentro de la página del informe
-    public async Task<string> FindPdfUrlFromDailyReportPageAsync()
+    public async Task<string?> FindPdfUrlFromDailyReportPageAsync()
     {
+        int maxDaysToLookBack = 10; // Mantener un límite razonable
+        DateTime currentDate = DateTime.Today; // Empezamos desde hoy
 
-        // Construye la URL del informe diario basada en la fecha
-        // Formato: InformeRentaFijaDDMMYY (ej. InformeRentaFija280625)
-        //string datePart = date.ToString("ddMMyy");
-        string dateSure = "040725";
-        string reportUrl = $"{_iamcReportsBaseUrl}InformeRentaFija{dateSure}/";
-
-
-        Console.WriteLine($"[DEBUG] Intentando acceder a la página del informe: {reportUrl}");
-
-        try
+        for (int i = 0; i < maxDaysToLookBack; i++)
         {
-            HttpResponseMessage response = await _httpClient.GetAsync(reportUrl);
-            Console.WriteLine($"Respuesta del servidor: {response.StatusCode}");
-            response.EnsureSuccessStatusCode(); // Lanza excepción si la respuesta no es 2xx
+            // Calcular la fecha a probar
+            DateTime dateToTry = currentDate.AddDays(-i);
 
-            string htmlContent = await response.Content.ReadAsStringAsync();
-
-            // *** LÍNEA DE DEPURACIÓN: Guarda el HTML a un archivo temporal ***
-            //string tempHtmlFilePath = Path.Combine(Path.GetTempPath(), $"IAMC_Report_{datePart}.html");
-            //await File.WriteAllTextAsync(tempHtmlFilePath, htmlContent);
-            //Console.WriteLine($"[DEBUG] HTML de la página guardado en: {tempHtmlFilePath}");
-            // ***************************************************************
-
-
-            // Usar AngleSharp para parsear el HTML
-            var parser = new HtmlParser();
-            IHtmlDocument document = await parser.ParseDocumentAsync(htmlContent);
-
-            // Buscar el div con id "visualizadorpdf" y luego la etiqueta <object>
-            // La etiqueta <object> está directamente dentro de un div con class "pdfVisualizador"
-            var pdfObjectElement = document.QuerySelector("div.pdfVisualizador object");
-
-
-
-            if (pdfObjectElement == null)
+            // --- OPTIMIZACIÓN: Saltar fines de semana ---
+            // Si el día es sábado o domingo, salta más rápido al viernes anterior.
+            // Esto solo es una optimización, la lógica actual ya manejaría el 404 si no se salta.
+            if (dateToTry.DayOfWeek == DayOfWeek.Saturday)
             {
-                Console.WriteLine("[DEBUG] El selector 'div.pdfVisualizador object' no encontró ningún elemento. Revisa el HTML de la página y el selector.");
-                return null;
+                dateToTry = dateToTry.AddDays(-1); // Retrocede al viernes
+                i++; // Incrementa i para no contar el sábado como un intento fallido "real"
+            }
+            else if (dateToTry.DayOfWeek == DayOfWeek.Sunday) 
+            {
+                dateToTry = dateToTry.AddDays(-2); // Retrocede al viernes
+                i += 2; // Incrementa i para no contar el domingo ni el sábado como intentos fallidos
+            }
+            // Asegurarse de que no nos pasamos del límite con esta resta adicional
+            if (i >= maxDaysToLookBack) // Si al ajustar la fecha, la 'i' se pasa del límite, salir del bucle
+            {
+                break;
             }
 
-            string pdfUrl = pdfObjectElement.GetAttribute("data");
-            if (!string.IsNullOrEmpty(pdfUrl))
+            // Formatea la fecha al formato "DDMMYY".
+            // Esta variable debe estar dentro del bucle para que se actualice en cada iteración.
+            string dateSure = dateToTry.ToString("ddMMyy");
+
+            // Construye la URL del informe diario basada en la fecha.
+            // Esta variable también debe estar dentro del bucle.
+            string reportUrl = $"{_iamcReportsBaseUrl}InformeRentaFija{dateSure}/";
+
+            Console.WriteLine($"[DEBUG] Intentando acceder a la página del informe para la fecha: {dateSure} ({reportUrl})");
+
+            try
             {
-                Console.WriteLine($"[DEBUG] URL del PDF encontrada: {pdfUrl}");
-                return pdfUrl;
+                HttpResponseMessage response = await _httpClient.GetAsync(reportUrl);
+                Console.WriteLine($"Respuesta del servidor para {dateSure}: {response.StatusCode}");
+
+                //var parsedData = JsonSerializer.Deserialize<List<RentaFijaActivo>>(jsonResponse, _jsonSerializerOptions); //ELIMINAR ESTO
+                // IMPORTANTE: En lugar de EnsureSuccessStatusCode(), verifica si es exitoso.
+                // Si no es exitoso (ej. 404), no lanzamos excepción, sino que continuamos al día anterior.
+                if (response.IsSuccessStatusCode)
+                {
+                    string htmlContent = await response.Content.ReadAsStringAsync();
+
+                    // *** LÍNEA DE DEPURACIÓN: Guarda el HTML a un archivo temporal ***
+                    //string tempHtmlFilePath = Path.Combine(Path.GetTempPath(), $"IAMC_Report_{dateSure}.html"); // Usar dateSure para el nombre
+                    //await File.WriteAllTextAsync(tempHtmlFilePath, htmlContent);
+                    //Console.WriteLine($"[DEBUG] HTML de la página guardado en: {tempHtmlFilePath}");
+                    // ***************************************************************
+
+                    // Usar AngleSharp para parsear el HTML
+                    var parser = new HtmlParser();
+                    IHtmlDocument document = await parser.ParseDocumentAsync(htmlContent);
+
+                    // Buscar el div con id "visualizadorpdf" y luego la etiqueta <object>
+                    // La etiqueta <object> está directamente dentro de un div con class "pdfVisualizador"
+                    var pdfObjectElement = document.QuerySelector("div.pdfVisualizador object");
+
+                    if (pdfObjectElement == null)
+                    {
+                        Console.WriteLine($"[DEBUG] El selector 'div.pdfVisualizador object' no encontró ningún elemento en la página para {dateSure}. Revisa el HTML o el selector. Saltando al día anterior.");
+                        // Si no se encuentra el elemento PDF, esta fecha no sirve, continuamos con el siguiente día.
+                        continue;
+                    }
+
+                    string pdfUrl = pdfObjectElement.GetAttribute("data");
+                    if (!string.IsNullOrEmpty(pdfUrl))
+                    {
+                        Console.WriteLine($"[DEBUG] URL del PDF encontrada para {dateSure}: {pdfUrl}");
+                        return pdfUrl; // ¡Éxito! Retorna la URL del PDF y termina la función.
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[DEBUG] Se encontró el elemento <object> para {dateSure}, pero su atributo 'data' es nulo o vacío. Saltando al día anterior.");
+                        // Si el atributo 'data' está vacío, la URL del PDF no es válida, continuamos.
+                        continue;
+                    }
+                }
+                else
+                {
+                    // Si la respuesta no fue exitosa (ej. 404 Not Found), no hay informe para esta fecha.
+                    Console.WriteLine($"[DEBUG] No se encontró informe para la fecha: {dateSure}. Estado HTTP: {response.StatusCode}. Intentando fecha anterior.");
+                    continue; // Pasa a la siguiente iteración (día anterior).
+                }
+
             }
-            else
+            
+            catch (HttpRequestException e)
             {
-                Console.WriteLine("[DEBUG] Se encontró el elemento <object>, pero su atributo 'data' es nulo o vacío.");
-                return null;
+                Console.WriteLine($"[DEBUG] Error HTTP al acceder a la página del informe para {dateSure}: {e.Message}. Intentando fecha anterior.");
+                continue; // Si hay un error de red o de solicitud, continúa con el día anterior.
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DEBUG] Error general al parsear la página del informe para {dateSure}: {ex.Message}. Intentando fecha anterior.");
+                continue; // Si hay cualquier otro error, continúa con el día anterior.
             }
         }
-        catch (HttpRequestException e)
-        {
-            Console.WriteLine($"Error HTTP al acceder a la página del informe ({reportUrl}): {e.Message}");
-            return null;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error al parsear la página del informe ({reportUrl}): {ex.Message}");
-            return null;
-        }
+
+        // Si el bucle termina después de revisar todos los días y no se encontró ningún PDF,
+        // significa que no hay informes válidos en el rango.
+        Console.WriteLine($"[ERROR] No se pudo encontrar un informe de renta fija válido en los últimos {maxDaysToLookBack} días.");
+        return null; // La función debe retornar null si no encuentra nada.
     }
-
 
     public async Task<string> DownloadPdfAsync(string pdfUrl)
     {
