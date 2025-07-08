@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RentaFijaApi.Services;
 using RentaFijaApi.DTOs;
+using System.Collections.Generic;
 
 [ApiController]
 [Route("[controller]")]
@@ -15,9 +16,11 @@ public class RentaFijaController : ControllerBase
         }
 
         [HttpGet()]
-        public async Task<ActionResult<List<RentaFijaActivo>>> GetRentaFijaData()
+        public async Task<ActionResult<List<RentaFijaActivo>>> GetRentaFijaData(
+         [FromQuery]
+        string? tipoActivo = null)
         {
-            var activos = await _rentaFijaService.GetRentaFijaDataForTodayAsync();
+            List<RentaFijaActivo> activos = await _rentaFijaService.GetRentaFijaDataForTodayAsync(tipoActivo);
 
             if (activos == null || activos.Count == 0)
             {

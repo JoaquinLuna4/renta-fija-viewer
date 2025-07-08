@@ -1,0 +1,492 @@
+[
+  {
+    "nombreCompleto": "BONTE 2025 CER +1.8%",
+    "Ticker": "TX25",
+    "Vencimiento": "2025-11-09",
+    "Cotización": 1263.5,
+    "TIR Anual": 11.34,
+    "Paridad": 97,
+    "tipoActivo": "BONTE",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BONTE 2026 CER +2%",
+    "Ticker": "TX26",
+    "Vencimiento": "2026-11-09",
+    "Cotización": 1483,
+    "TIR Anual": 12.06,
+    "Paridad": 55.6,
+    "tipoActivo": "BONTE",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BONTE 2028 CER +2,25%",
+    "Ticker": "TX28",
+    "Vencimiento": "2028-11-09",
+    "Cotización": 1607.5,
+    "TIR Anual": 11.49,
+    "Paridad": 60.23,
+    "tipoActivo": "BONTE",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BONTE 2028 CER +2,5%",
+    "Ticker": "TX31",
+    "Vencimiento": "2031-11-30",
+    "Cotización": 950,
+    "TIR Anual": 2.37,
+    "Paridad": 100.54,
+    "tipoActivo": "BONTE",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BONO TES. NAC. $ CER",
+    "Ticker": "TZX26",
+    "Vencimiento": "2026-06-30",
+    "Cotización": 268.3,
+    "TIR Anual": 11.9,
+    "Paridad": 89.58,
+    "tipoActivo": "BONO TES. NAC. CER",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BONO TES. NAC. $ CER",
+    "Ticker": "TZX27",
+    "Vencimiento": "2027-06-30",
+    "Cotización": 242.5,
+    "TIR Anual": 11.26,
+    "Paridad": 80.97,
+    "tipoActivo": "BONO TES. NAC. CER",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BONO TES. NAC. $ CER",
+    "Ticker": "TZX28",
+    "Vencimiento": "2028-06-30",
+    "Cotización": 218.4,
+    "TIR Anual": 11.17,
+    "Paridad": 72.92,
+    "tipoActivo": "BONO TES. NAC. CER",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BONO TES. NAC. $ CER",
+    "Ticker": "TZXD5",
+    "Vencimiento": "2025-12-30",
+    "Cotización": 211.2,
+    "TIR Anual": 11.38,
+    "Paridad": 95.39,
+    "tipoActivo": "BONO TES. NAC. CER",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BONO TES. NAC. $ CER",
+    "Ticker": "TZXD6",
+    "Vencimiento": "2026-12-30",
+    "Cotización": 189,
+    "TIR Anual": 11.63,
+    "Paridad": 85.36,
+    "tipoActivo": "BONO TES. NAC. CER",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BONO TES. NAC. $ CER",
+    "Ticker": "TZXD7",
+    "Vencimiento": "2027-12-15",
+    "Cotización": 170.2,
+    "TIR Anual": 11.39,
+    "Paridad": 76.87,
+    "tipoActivo": "BONO TES. NAC. CER",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BONO TES. NAC. $ CER",
+    "Ticker": "TZXM6",
+    "Vencimiento": "2026-03-31",
+    "Cotización": 163.75,
+    "TIR Anual": 0.68,
+    "Paridad": 91.91,
+    "tipoActivo": "BONO TES. NAC. CER",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BONO TES. NAC. $ CER",
+    "Ticker": "TZXM7",
+    "Vencimiento": "2027-03-31",
+    "Cotización": 137.5,
+    "TIR Anual": 11.55,
+    "Paridad": 82.78,
+    "tipoActivo": "BONO TES. NAC. CER",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BONO TES. NAC. $ CER",
+    "Ticker": "TZXO5",
+    "Vencimiento": "2025-10-31",
+    "Cotización": 120.7,
+    "TIR Anual": 12.13,
+    "Paridad": 96.52,
+    "tipoActivo": "BONO TES. NAC. CER",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BONO TES. NAC. $ CER",
+    "Ticker": "TZXO6",
+    "Vencimiento": "2026-10-31",
+    "Cotización": 107.75,
+    "TIR Anual": 12.07,
+    "Paridad": 86.16,
+    "tipoActivo": "BONO TES. NAC. CER",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "LECAP VTO 31/7/2025",
+    "Ticker": "S31L5",
+    "Vencimiento": "2025-07-31",
+    "Cotización": 145.15,
+    "TIR Anual": null,
+    "Paridad": null,
+    "tipoActivo": "LECAP",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "LECAP VTO 15/8/2025",
+    "Ticker": "S15G5",
+    "Vencimiento": "2025-08-15",
+    "Cotización": 142.3,
+    "TIR Anual": null,
+    "Paridad": null,
+    "tipoActivo": "LECAP",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "LECAP VTO 29/8/2025",
+    "Ticker": "S29G5",
+    "Vencimiento": "2025-08-29",
+    "Cotización": 151.3,
+    "TIR Anual": null,
+    "Paridad": null,
+    "tipoActivo": "LECAP",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "LECAP VTO 12/9/2025",
+    "Ticker": "S12S5",
+    "Vencimiento": "2025-09-12",
+    "Cotización": 150.8,
+    "TIR Anual": null,
+    "Paridad": null,
+    "tipoActivo": "LECAP",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "LECAP VTO 30/9/2025",
+    "Ticker": "S30S5",
+    "Vencimiento": "2025-09-30",
+    "Cotización": 149.72,
+    "TIR Anual": null,
+    "Paridad": null,
+    "tipoActivo": "LECAP",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "LECAP VTO. 31/10/25",
+    "Ticker": "S31O5",
+    "Vencimiento": "2025-10-31",
+    "Cotización": 120.97,
+    "TIR Anual": null,
+    "Paridad": null,
+    "tipoActivo": "LECAP",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "LECAP VTO. 28/11/25",
+    "Ticker": "S28N5",
+    "Vencimiento": "2025-11-28",
+    "Cotización": 109.7,
+    "TIR Anual": null,
+    "Paridad": null,
+    "tipoActivo": "LECAP",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "LECAP VTO. 10/11/25",
+    "Ticker": "S10N5",
+    "Vencimiento": "2025-11-10",
+    "Cotización": 110.05,
+    "TIR Anual": null,
+    "Paridad": null,
+    "tipoActivo": "LECAP",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BONO CAP. VTO 17/10/2025",
+    "Ticker": "T17O5",
+    "Vencimiento": "2025-10-17",
+    "Cotización": 146.4,
+    "TIR Anual": null,
+    "Paridad": null,
+    "tipoActivo": "BONOCAP",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BONO CAP. VTO 15/12/2026",
+    "Ticker": "T15D5",
+    "Vencimiento": "2025-12-15",
+    "Cotización": 149.15,
+    "TIR Anual": null,
+    "Paridad": null,
+    "tipoActivo": "BONOCAP",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BONO CAP. VTO 13/2/2026",
+    "Ticker": "T13F6",
+    "Vencimiento": "2026-02-13",
+    "Cotización": 119.6,
+    "TIR Anual": null,
+    "Paridad": null,
+    "tipoActivo": "BONOCAP",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BOPREAL 1 CLASE A 2027 PESOS",
+    "Ticker": "BPOA7",
+    "Vencimiento": "2027-10-31",
+    "Cotización": 127400,
+    "TIR Anual": 5.79,
+    "Paridad": 98.64,
+    "tipoActivo": "BOPREAL",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BOPREAL 1 CLASE B 2027 PESOS",
+    "Ticker": "BPOB7",
+    "Vencimiento": "2027-10-31",
+    "Cotización": 129190,
+    "TIR Anual": 5.04,
+    "Paridad": 100.03,
+    "tipoActivo": "BOPREAL",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BOPREAL 1 CLASE C 2027 PESOS",
+    "Ticker": "BPOC7",
+    "Vencimiento": "2027-10-31",
+    "Cotización": 123420,
+    "TIR Anual": 7.51,
+    "Paridad": 95.56,
+    "tipoActivo": "BOPREAL",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BOPREAL 1 CLASE D 2027 PESOS",
+    "Ticker": "BPOD7",
+    "Vencimiento": "2027-10-31",
+    "Cotización": 123350,
+    "TIR Anual": 7.54,
+    "Paridad": 95.5,
+    "tipoActivo": "BOPREAL",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BOPREAL 1 CLASE A 2027 CABLE",
+    "Ticker": "BPA7C",
+    "Vencimiento": "2027-10-31",
+    "Cotización": 99.75,
+    "TIR Anual": 5.69,
+    "Paridad": 98.82,
+    "tipoActivo": "BOPREAL",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BOPREAL 1 CLASE B 2027 CABLE",
+    "Ticker": "BPB7C",
+    "Vencimiento": "2027-10-31",
+    "Cotización": 99.15,
+    "TIR Anual": 5.69,
+    "Paridad": 98.22,
+    "tipoActivo": "BOPREAL",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BOPREAL 1 CLASE C 2027 CABLE",
+    "Ticker": "BPC7C",
+    "Vencimiento": "2027-10-31",
+    "Cotización": 97,
+    "TIR Anual": 7.21,
+    "Paridad": 96.09,
+    "tipoActivo": "BOPREAL",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BOPREAL 1 CLASE D 2027 CABLE",
+    "Ticker": "BPD7C",
+    "Vencimiento": "2027-10-31",
+    "Cotización": 96.5,
+    "TIR Anual": 7.49,
+    "Paridad": 95.6,
+    "tipoActivo": "BOPREAL",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BOPREAL 1 CLASE A 2027 MEP",
+    "Ticker": "BPA7D",
+    "Vencimiento": "2027-10-31",
+    "Cotización": 100.25,
+    "TIR Anual": 5.42,
+    "Paridad": 99.31,
+    "tipoActivo": "BOPREAL",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BOPREAL 1 CLASE B 2027 MEP",
+    "Ticker": "BPB7D",
+    "Vencimiento": "2027-10-31",
+    "Cotización": 99.2,
+    "TIR Anual": 5.99,
+    "Paridad": 98.27,
+    "tipoActivo": "BOPREAL",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BOPREAL 1 CLASE C 2027 MEP",
+    "Ticker": "BPC7D",
+    "Vencimiento": "2027-10-31",
+    "Cotización": 97.17,
+    "TIR Anual": 7.11,
+    "Paridad": 96.26,
+    "tipoActivo": "BOPREAL",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BOPREAL 1 CLASE D 2027 MEP",
+    "Ticker": "BPD7D",
+    "Vencimiento": "2027-10-31",
+    "Cotización": 96.5,
+    "TIR Anual": 7.49,
+    "Paridad": 95.6,
+    "tipoActivo": "BOPREAL",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BOPREAL SERIE 3-2026-PESOS",
+    "Ticker": "BPY26",
+    "Vencimiento": "2026-05-31",
+    "Cotización": 128500,
+    "TIR Anual": 5.21,
+    "Paridad": 99.49,
+    "tipoActivo": "BOPREAL",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BOPREAL SERIE 3-2026-MEP",
+    "Ticker": "BPY6D",
+    "Vencimiento": "2026-05-31",
+    "Cotización": 100.55,
+    "TIR Anual": 5.02,
+    "Paridad": 99.61,
+    "tipoActivo": "BOPREAL",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BOPREAL SERIE 3-2026-CABLE",
+    "Ticker": "BPY6C",
+    "Vencimiento": "2026-05-31",
+    "Cotización": 100.25,
+    "TIR Anual": 5.51,
+    "Paridad": 99.31,
+    "tipoActivo": "BOPREAL",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "BOPREAL VTO 31/10/28",
+    "Ticker": "BPO28",
+    "Vencimiento": "2028-10-31",
+    "Cotización": 104900,
+    "TIR Anual": 9.72,
+    "Paridad": 81.89,
+    "tipoActivo": "BOPREAL",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "CABA Feb. 2028",
+    "Ticker": "BDC28",
+    "Vencimiento": "2028-02-22",
+    "Cotización": 118.95,
+    "TIR Anual": 39.21,
+    "Paridad": 108.77,
+    "tipoActivo": "Otro",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "Córdoba Oct. 2026",
+    "Ticker": "CO26",
+    "Vencimiento": "2026-10-27",
+    "Cotización": 25000,
+    "TIR Anual": 2.94,
+    "Paridad": 102.78,
+    "tipoActivo": "Otro",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "Córdoba Oct. 2026 - USD",
+    "Ticker": "CO26D",
+    "Vencimiento": "2026-10-27",
+    "Cotización": 19.6,
+    "TIR Anual": 2.46,
+    "Paridad": 103.1,
+    "tipoActivo": "Otro",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "Córdoba Oct. 2032",
+    "Ticker": "CO32",
+    "Vencimiento": "2032-07-02",
+    "Cotización": 129000,
+    "TIR Anual": 9.82,
+    "Paridad": 100.71,
+    "tipoActivo": "Otro",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "PBA USD 2037 Clase BBB",
+    "Ticker": "37D1",
+    "Vencimiento": "2037-09-01",
+    "Cotización": 81970,
+    "TIR Anual": 14.68,
+    "Paridad": 89.62,
+    "tipoActivo": "Otro",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "PBA USD 2037 Clase ABA",
+    "Ticker": "A37D1",
+    "Vencimiento": "2037-09-01",
+    "Cotización": 88550,
+    "TIR Anual": 14.45,
+    "Paridad": 90.37,
+    "tipoActivo": "Otro",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "PBA USD 2037 Clase A - USD",
+    "Ticker": "BA7DD1",
+    "Vencimiento": "2037-09-01",
+    "Cotización": 69.5,
+    "TIR Anual": 14.34,
+    "Paridad": 63.47,
+    "tipoActivo": "Otro",
+    "Fecha Ultima Cotizacion": null
+  },
+  {
+    "nombreCompleto": "PBA USD 2037 Clase B - USD",
+    "Ticker": "BB7DD1",
+    "Vencimiento": "2037-09-01",
+    "Cotización": 64.35,
+    "TIR Anual": 14.38,
+    "Paridad": 63.04,
+    "tipoActivo": "Otro",
+    "Fecha Ultima Cotizacion": null
+  }
+]

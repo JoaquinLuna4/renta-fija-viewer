@@ -210,33 +210,25 @@ namespace RentaFijaApi.Services
         {
             Console.WriteLine("[DEBUG] Devolviendo datos de simulación.");
             await Task.Delay(50); // Simular una pequeña latencia
+                                  // Obtiene la ruta al directorio de ejecución de la aplicación
+            string baseDirectory = AppContext.BaseDirectory;
 
-            return @"[
-       {
-    ""NombreCompleto"": ""O.N. VISTA CLASE XXVI VTO 2031"",
-    ""Ticker"": ""VSCRO"",
-    ""Vencimiento"": ""2031-10-10"",
-    ""Cotización"": 100.12999,
-    ""TIR Anual"": 4.23,
-    ""Paridad"": 101.74
-  },
-  {
-    ""NombreCompleto"": ""YPF Cl. XXIX Vto. 2025"",
-    ""Ticker"": ""YCA6O"",
-    ""Vencimiento"": ""2025-07-28"",
-    ""Cotización"": 100.38395,
-    ""TIR Anual"": null,
-    ""Paridad"": 101.443
-  },
-  {
-    ""NombreCompleto"": ""MASTELLONE HNOS. Clase G en U$S"",
-    ""Ticker"": ""MTCGO"",
-    ""Vencimiento"": ""2026-06-30"",
-    ""Cotización"": 100.1255,
-    ""TIR Anual"": 0.93,
-    ""Paridad"": 100.061
-  },
-    ]";
+
+            // Combina con la ruta relativa de tu archivo JSON
+            string filePath = Path.Combine(baseDirectory, "Data", "simulated_gemini_response.json");
+
+            if (File.Exists(filePath))
+            {
+                // Lee todo el contenido del archivo como una cadena
+                string jsonContent = await File.ReadAllTextAsync(filePath);
+                return jsonContent;
+            }
+            else
+            {
+                Console.WriteLine($"[ERROR] Archivo de simulación no encontrado: {filePath}");
+                
+                return "[]"; // Retorna un array JSON vacío si no se encuentra el archivo
+            }
         }
         private void AssignTipoActivo(RentaFijaActivo asset)
         {

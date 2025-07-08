@@ -68,7 +68,7 @@ public class RentaFijaService
                 HttpResponseMessage response = await _httpClient.GetAsync(reportUrl);
                 Console.WriteLine($"Respuesta del servidor para {dateSure}: {response.StatusCode}");
 
-                //var parsedData = JsonSerializer.Deserialize<List<RentaFijaActivo>>(jsonResponse, _jsonSerializerOptions); //ELIMINAR ESTO
+            
                 // IMPORTANTE: En lugar de EnsureSuccessStatusCode(), verifica si es exitoso.
                 // Si no es exitoso (ej. 404), no lanzamos excepción, sino que continuamos al día anterior.
                 if (response.IsSuccessStatusCode)
@@ -172,9 +172,10 @@ public class RentaFijaService
     }
 
     
-    public async Task<List<RentaFijaActivo>> GetRentaFijaDataForTodayAsync()
+    public async Task<List<RentaFijaActivo>> GetRentaFijaDataForTodayAsync(string? tipoActivo = null)
     {
-        Console.WriteLine($"[DEBUG] Iniciando proceso de extracción de datos ");
+        Console.WriteLine($"[DEBUG] Iniciando proceso de extracción de datos. Parámetro tipoActivo recibido: '{tipoActivo ?? "null o vacío"}'");
+
 
         // 1. Encontrar la URL del PDF
         string pdfPageUrl = await FindPdfUrlFromDailyReportPageAsync();
@@ -200,7 +201,23 @@ public class RentaFijaService
         Console.WriteLine("[DEBUG] Enviando texto a Gemini para interpretación.");
         List<RentaFijaActivo> activos = await _geminiApiService.ExtractRentaFijaDataFromTextAsync(fullPdfText);
 
-        // Opcional: Eliminar el archivo PDF temporal después de procesar
+
+        //---OPTIMIZACIÓN: Filtrar por tipo de activo si se proporciona;
+        if (activos != null && activos.Any() && !string.IsNullOrEmpty(tipoActivo))
+        {
+            Console.WriteLine($"[DEBUG] Aplicando filtro por tipo de activo: '{tipoActivo}'");
+            // Filtra la lista de activos
+            activos = activos.Where(a =>
+                a.TipoActivo != null &&
+                string.Equals(a.TipoActivo, tipoActivo, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+
+            Console.WriteLine($"[DEBUG] Después del filtro, se encontraron {activos.Count} activos.");
+        }
+        //------FIN DE OPTIMIZACIÓN
+
+
+        // Eliminar el archivo PDF temporal después de procesar
         try
         {
             if (File.Exists(pdfFilePath))
