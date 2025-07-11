@@ -2,8 +2,9 @@ import React from "react";
 import { useState, useEffect } from "react";
 
 import { GridTable } from "../components/GridTable";
-import { Container, Paper, Box, Typography } from "@mui/material";
+import { Container, Paper, Box } from "@mui/material";
 import { fetchAssets } from "../services/assetsService";
+import Loading from "../components/Loading";
 const AllAssets = () => {
 	const [rowsState, setRowsState] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -56,11 +57,10 @@ const AllAssets = () => {
 						justifyContent: "center",
 						alignItems: "center",
 						height: 300,
+						width: "100%",
 					}}
 				>
-					<Typography variant="h6" color="text.primary">
-						Cargando datos...
-					</Typography>
+					<Loading />
 				</Box>
 			) : (
 				<Paper elevation={3} sx={{ padding: 2, backgroundColor: "lightgray" }}>
