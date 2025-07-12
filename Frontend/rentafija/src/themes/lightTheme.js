@@ -34,8 +34,8 @@ const lightTheme = createTheme({
 			main: "#4CAF50", // Color de éxito estándar
 		},
 		text: {
-			primary: "rgb(166, 166, 166)",
-			secondary: "rgb(46, 46, 46)",
+			primary: "rgba(22, 22, 22, 1)",
+			secondary: "rgb(166, 166, 166)",
 		},
 		background: {
 			default: "rgb(46, 46, 46)",

@@ -15,7 +15,7 @@ export const GridTable = ({
 				initialState={{ pagination: { paginationModel } }}
 				pageSizeOptions={pageSizeOptions}
 				sx={{
-					border: 0,
+					border: 8,
 
 					...sx,
 				}}
