@@ -1,14 +1,11 @@
-﻿using UglyToad.PdfPig;
-using UglyToad.PdfPig.Content;
+﻿
 using AngleSharp.Html.Dom; // Agrega este using
 using AngleSharp.Html.Parser; // Agrega este using
 using System; // Para DateTime.Today
-
-using System.Text.RegularExpressions;
+using RentaFijaApi.Caching; 
 using System.Globalization;
 using RentaFijaApi.DTOs;
 using RentaFijaApi.Services;
-using System.Text.Json;
 public class RentaFijaService
 {
     private readonly HttpClient _httpClient;
@@ -16,6 +13,7 @@ public class RentaFijaService
     private readonly string _iamcReportsBaseUrl = "https://www.iamc.com.ar/Informe/";
     private readonly string _pdfFileName = "InformeDiarioIAMC.pdf"; // Nombre de archivo temporal
     private readonly IGeminiApiService _geminiApiService;
+
     private readonly bool _useSimulation;
     public RentaFijaService(HttpClient httpClient, IPdfExtractionService pdfExtractionService, IGeminiApiService geminiApiService, bool useSimulation = false)
     {
@@ -177,39 +175,73 @@ public class RentaFijaService
     public async Task<RentaFijaReportResponse> GetRentaFijaDataForTodayAsync(string? tipoActivo = null)
     {
        Console.WriteLine($"[DEBUG] Iniciando proceso de extracción de datos. Parámetro tipoActivo recibido: '{tipoActivo ?? "null o vacío"}'");
-        string currentDateString = DateTime.Now.ToString("ddMMyy");
-        DateTime reportDate;
-        if (!DateTime.TryParseExact(currentDateString, "ddMMyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out reportDate))
+
+       // DateTime today = DateTime.Today; // Fecha de hoy (solo día, sin hora) para la comparación
+       DateTime today = new DateTime(2025, 7, 11); // Fecha de manual solo para testing
+
+
+        // --- Lógica de Cacheo ---
+        // Intenta obtener los datos de la caché para el día de hoy
+        RentaFijaReportResponse? cachedResponse = DataCache.GetCache(today);
+
+        if (cachedResponse != null)
         {
-            reportDate = DateTime.Today; // Fallback a la fecha de hoy si hay un problema
+            Console.WriteLine("[DEBUG] Sirviendo datos desde la caché para la fecha del informe: " + cachedResponse.FechaInforme.ToShortDateString());
+            // Si los datos están en caché y son para hoy, aplica el filtro y devuelve
+            if (!string.IsNullOrEmpty(tipoActivo))
+            {
+                List<RentaFijaActivo> filteredActivos = cachedResponse.Activos
+                    .Where(a => a.TipoActivo != null &&
+                                string.Equals(a.TipoActivo, tipoActivo, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                return new RentaFijaReportResponse
+                {
+                    Activos = filteredActivos,
+                    FechaInforme = cachedResponse.FechaInforme,
+                    Mensaje = filteredActivos.Any() ? "Datos cacheados y filtrados con éxito." : "No se encontraron activos con el filtro en la caché."
+                };
+            }
+            return cachedResponse; // Devuelve el informe completo desde la caché
         }
-        Console.WriteLine($"[DEBUG] el valor de reportdate previo al paso de encontrar la url: {reportDate}");
+
+        // --- Fin Lógica de Cacheo ---
+
+        // Si los datos no están en caché o no son de hoy, procede con la extracción completa
+        Console.WriteLine("[DEBUG] Caché vacía o desactualizada. Procediendo a extraer nuevo informe.");
 
         // 1. Encontrar la URL del PDF y la fecha del informe usando el DTO
-        PdfReportInfo? reportInfo = await FindPdfUrlFromDailyReportPageAsync(); 
+        PdfReportInfo? reportInfo = await FindPdfUrlFromDailyReportPageAsync();
+
+        // Variable para la fecha real del informe, inicializada con un fallback
+        DateTime actualReportDate;
 
         if (reportInfo == null || string.IsNullOrEmpty(reportInfo.PdfUrl)) // Verifica si se encontró la info
         {
             Console.WriteLine("No se pudo encontrar la URL del PDF. Abortando extracción.");
+            actualReportDate = DateTime.Today; // Establece la fecha de fallback
             return new RentaFijaReportResponse
             {
-                FechaInforme = DateTime.Today, // Fecha de fallback si no se encontró nada
+                FechaInforme = actualReportDate,
                 Mensaje = "No se pudo encontrar la URL del PDF del informe."
             };
         }
-
-        Console.WriteLine($"[DEBUG] el valor de reportdate despues de encontrar la url: {reportDate}");
+        else
+        {
+            //Asignamos la fecha encontrada a actualReportDate
+            actualReportDate = reportInfo.ReportDate;
+            Console.WriteLine($"[DEBUG] FindPdfUrlFromDailyReportPageAsync encontró: URL={reportInfo.PdfUrl} y Fecha={actualReportDate.ToShortDateString()}");
+        }
+        Console.WriteLine($"[DEBUG] el valor de actualReportDate después de encontrar la url: {actualReportDate}");
 
 
         // 2. Descargar el PDF
         string pdfFilePath = await DownloadPdfAsync(reportInfo.PdfUrl);
-        Console.WriteLine($"[DEBUG] el valor de reportdate despues de descargar el pdf: {reportDate}");
         if (string.IsNullOrEmpty(pdfFilePath))
         {
             Console.WriteLine("No se pudo descargar el PDF. Abortando extracción.");
             return new RentaFijaReportResponse
             {
-                FechaInforme = reportDate, // Usamos la fecha que sí encontramos
+                FechaInforme = actualReportDate, // Usamos la fecha que sí encontramos
                 Mensaje = "No se pudo descargar el PDF."
             };
         }
@@ -255,12 +287,20 @@ public class RentaFijaService
         }
 
         Console.WriteLine($"[DEBUG] Proceso de extracción finalizado. Se encontraron {activos.Count} activos.");
-        return new RentaFijaReportResponse
+        RentaFijaReportResponse finalResponse = new RentaFijaReportResponse
         {
-            Activos = activos ?? new List<RentaFijaActivo>(), // Asegúrate de que no sea null
-            FechaInforme = reportDate,
+            Activos = activos ?? new List<RentaFijaActivo>(),
+            FechaInforme = actualReportDate,
             Mensaje = activos != null && activos.Any() ? "Datos extraídos con éxito." : "No se encontraron activos o la extracción falló."
         };
+
+        // --- Lógica de Cacheo (Guardar el informe completo) ---
+        // Guardamos la respuesta completa (sin el filtro de tipoActivo aplicado, si lo hubo)
+        // Esto permite que futuras peticiones con diferentes filtros usen la misma base cacheados.
+        DataCache.SetCache(finalResponse, actualReportDate);
+        // --- Fin Lógica de Cacheo ---
+
+        return finalResponse;
     }
 
 }
