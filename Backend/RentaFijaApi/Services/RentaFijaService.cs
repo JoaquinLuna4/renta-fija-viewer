@@ -15,16 +15,18 @@ public class RentaFijaService
     private readonly IPdfExtractionService _pdfExtractionService;
     private readonly string _iamcReportsBaseUrl = "https://www.iamc.com.ar/Informe/";
     private readonly string _pdfFileName = "InformeDiarioIAMC.pdf"; // Nombre de archivo temporal
-    private readonly IGeminiApiService _geminiApiService; 
-    public RentaFijaService(HttpClient httpClient, IPdfExtractionService pdfExtractionService, IGeminiApiService geminiApiService)
+    private readonly IGeminiApiService _geminiApiService;
+    private readonly bool _useSimulation;
+    public RentaFijaService(HttpClient httpClient, IPdfExtractionService pdfExtractionService, IGeminiApiService geminiApiService, bool useSimulation = false)
     {
         _httpClient = httpClient;
         _pdfExtractionService = pdfExtractionService;
         _geminiApiService = geminiApiService;
+        _useSimulation = useSimulation;
     }
 
     // Este método ahora se encargará de encontrar la URL del PDF dentro de la página del informe
-    public async Task<string?> FindPdfUrlFromDailyReportPageAsync()
+    public async Task<PdfReportInfo?> FindPdfUrlFromDailyReportPageAsync()
     {
         int maxDaysToLookBack = 10; // Mantener un límite razonable
         DateTime currentDate = DateTime.Today; // Empezamos desde hoy
@@ -100,7 +102,7 @@ public class RentaFijaService
                     if (!string.IsNullOrEmpty(pdfUrl))
                     {
                         Console.WriteLine($"[DEBUG] URL del PDF encontrada para {dateSure}: {pdfUrl}");
-                        return pdfUrl; // ¡Éxito! Retorna la URL del PDF y termina la función.
+                        return new PdfReportInfo { PdfUrl = pdfUrl, ReportDate = dateToTry }; // ¡Éxito! Retorna la URL del PDF y termina la función.
                     }
                     else
                     {
@@ -172,26 +174,47 @@ public class RentaFijaService
     }
 
     
-    public async Task<List<RentaFijaActivo>> GetRentaFijaDataForTodayAsync(string? tipoActivo = null)
+    public async Task<RentaFijaReportResponse> GetRentaFijaDataForTodayAsync(string? tipoActivo = null)
     {
-        Console.WriteLine($"[DEBUG] Iniciando proceso de extracción de datos. Parámetro tipoActivo recibido: '{tipoActivo ?? "null o vacío"}'");
+       Console.WriteLine($"[DEBUG] Iniciando proceso de extracción de datos. Parámetro tipoActivo recibido: '{tipoActivo ?? "null o vacío"}'");
+        string currentDateString = DateTime.Now.ToString("ddMMyy");
+        DateTime reportDate;
+        if (!DateTime.TryParseExact(currentDateString, "ddMMyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out reportDate))
+        {
+            reportDate = DateTime.Today; // Fallback a la fecha de hoy si hay un problema
+        }
+        Console.WriteLine($"[DEBUG] el valor de reportdate previo al paso de encontrar la url: {reportDate}");
 
+        // 1. Encontrar la URL del PDF y la fecha del informe usando el DTO
+        PdfReportInfo? reportInfo = await FindPdfUrlFromDailyReportPageAsync(); 
 
-        // 1. Encontrar la URL del PDF
-        string pdfPageUrl = await FindPdfUrlFromDailyReportPageAsync();
-        if (string.IsNullOrEmpty(pdfPageUrl))
+        if (reportInfo == null || string.IsNullOrEmpty(reportInfo.PdfUrl)) // Verifica si se encontró la info
         {
             Console.WriteLine("No se pudo encontrar la URL del PDF. Abortando extracción.");
-            return new List<RentaFijaActivo>();
+            return new RentaFijaReportResponse
+            {
+                FechaInforme = DateTime.Today, // Fecha de fallback si no se encontró nada
+                Mensaje = "No se pudo encontrar la URL del PDF del informe."
+            };
         }
 
+        Console.WriteLine($"[DEBUG] el valor de reportdate despues de encontrar la url: {reportDate}");
+
+
         // 2. Descargar el PDF
-        string pdfFilePath = await DownloadPdfAsync(pdfPageUrl);
+        string pdfFilePath = await DownloadPdfAsync(reportInfo.PdfUrl);
+        Console.WriteLine($"[DEBUG] el valor de reportdate despues de descargar el pdf: {reportDate}");
         if (string.IsNullOrEmpty(pdfFilePath))
         {
             Console.WriteLine("No se pudo descargar el PDF. Abortando extracción.");
-            return new List<RentaFijaActivo>();
+            return new RentaFijaReportResponse
+            {
+                FechaInforme = reportDate, // Usamos la fecha que sí encontramos
+                Mensaje = "No se pudo descargar el PDF."
+            };
         }
+
+
 
         // 3. Extraer el texto completo del PDF usando PdfExtractionService
         Console.WriteLine($"[DEBUG] Extrayendo texto completo del PDF: {pdfFilePath}");
@@ -232,7 +255,12 @@ public class RentaFijaService
         }
 
         Console.WriteLine($"[DEBUG] Proceso de extracción finalizado. Se encontraron {activos.Count} activos.");
-        return activos;
+        return new RentaFijaReportResponse
+        {
+            Activos = activos ?? new List<RentaFijaActivo>(), // Asegúrate de que no sea null
+            FechaInforme = reportDate,
+            Mensaje = activos != null && activos.Any() ? "Datos extraídos con éxito." : "No se encontraron activos o la extracción falló."
+        };
     }
 
 }

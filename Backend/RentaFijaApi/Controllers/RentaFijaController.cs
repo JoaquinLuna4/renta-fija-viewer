@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using RentaFijaApi.Services;
 using RentaFijaApi.DTOs;
 using System.Collections.Generic;
+using System;
 
 [ApiController]
 [Route("[controller]")]
@@ -20,13 +21,13 @@ public class RentaFijaController : ControllerBase
          [FromQuery]
         string? tipoActivo = null)
         {
-            List<RentaFijaActivo> activos = await _rentaFijaService.GetRentaFijaDataForTodayAsync(tipoActivo);
+        RentaFijaReportResponse response = await _rentaFijaService.GetRentaFijaDataForTodayAsync(tipoActivo);
 
-            if (activos == null || activos.Count == 0)
+            if (response == null || response.Activos.Count == 0)
             {
-                return NotFound("No se encontraron datos de renta fija para el informe actual.");
-            }
+            return NotFound(response?.Mensaje ?? "No se encontraron datos de renta fija.");
+        }
 
-            return Ok(activos);
+            return Ok(response);
         }
     }
