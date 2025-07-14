@@ -9,19 +9,23 @@ RUN dotnet restore "RentaFijaApi/RentaFijaApi.csproj"
 # Copia el resto de los archivos del proyecto
 COPY . .
 WORKDIR "/src/RentaFijaApi" 
+
 # Construye la aplicación en modo Release
-RUN dotnet build "RentaFijaApi.csproj" -c Release -o /app/build
+
+RUN dotnet build "RentaFijaApi.csproj" -c Release -o ./publish_build/
 
 # Etapa de publicación
 FROM build AS publish
-RUN dotnet publish "RentaFijaApi.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+RUN dotnet publish "RentaFijaApi.csproj" -c Release -o ./publish_app/ /p:UseAppHost=false
 
 # Etapa final de ejecución
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
 # Copia los archivos publicados al directorio final
-COPY --from=publish /app/publish .
+
+COPY --from=publish /src/RentaFijaApi/publish_app/ . 
 
 # Define el punto de entrada de la aplicación
-ENTRYPOINT ["dotnet", "RentaFijaApi.dll"] 
+ENTRYPOINT ["dotnet", "RentaFijaApi.dll"]
