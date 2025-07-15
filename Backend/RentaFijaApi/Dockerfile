@@ -6,15 +6,16 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app_build_src 
 
 # Copia los archivos del proyecto para la restauración de dependencias
-# Aseguramos que el .csproj esté en la raíz de nuestro WORKDIR
-COPY ["RentaFijaApi/RentaFijaApi.csproj", "./"] 
+# Asumimos que el .csproj está directamente en el contexto de Docker
+COPY ["RentaFijaApi.csproj", "./"] 
 
 # Restaura las dependencias
 RUN dotnet restore "RentaFijaApi.csproj"
 
 # Copia el resto de los archivos del proyecto al WORKDIR
-# Asumimos que el Root Directory de Render es Backend/RentaFijaApi/
-COPY RentaFijaApi/. . 
+# Asumimos que todos los archivos (controladores, servicios, Program.cs) 
+# están directamente en el contexto de Docker.
+COPY . . 
 
 # Construye la aplicación en modo Release
 # El output va a una subcarpeta del WORKDIR actual (/app_build_src/publish_build/)
@@ -30,7 +31,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app # Este es el WORKDIR de la imagen final (usualmente /app)
 
 # Copia los archivos publicados desde la etapa 'publish' a la etapa 'final'
-# La ruta de origen es relativa al WORKDIR de la etapa 'publish' (/app_build_src/publish_app/)
+# La ruta de origen es consistente con el WORKDIR de la etapa 'build' (/app_build_src/)
 COPY --from=publish /app_build_src/publish_app/ . 
 
 # Define el punto de entrada de la aplicación
