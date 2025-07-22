@@ -103,8 +103,36 @@ namespace RentaFijaApi.Services
                     Console.WriteLine($"[DEBUG] Enviando solicitud a Gemini API: {fullApiUrl}");
 
                     HttpResponseMessage response = await _httpClient.PostAsync(fullApiUrl, content);
-                    response.EnsureSuccessStatusCode(); // Lanza excepción si la respuesta no es 2xx
 
+                    if (!response.IsSuccessStatusCode) // Lanza excepción si la respuesta no es 2xx
+                    {
+                        apiResponse = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine($"[ERROR] La API de Gemini respondió con código de estado HTTP no exitoso: {(int)response.StatusCode} {response.ReasonPhrase}");
+                        Console.WriteLine($"[ERROR] Contenido de la respuesta de error de Gemini: {apiResponse}");
+
+                        if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable) // 503
+                        {
+                            Console.WriteLine("[ERROR] La API de Gemini no está disponible (503 Service Unavailable).");
+                            throw new ApplicationException("El servicio de Gemini no está disponible temporalmente (503). Por favor, inténtelo de nuevo más tarde.", new HttpRequestException($"Gemini 503: {apiResponse}"));
+                        }
+
+                        else if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests) // 429
+                        {
+                            Console.WriteLine("[ERROR] Se excedió el límite de solicitudes a la API de Gemini (429 Too Many Requests).");
+                            throw new ApplicationException("Se ha excedido el límite de uso para la API de Gemini (429).", new HttpRequestException($"Gemini 429: {apiResponse}"));
+                        }
+                        else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized || response.StatusCode == System.Net.HttpStatusCode.Forbidden) // 401/403
+                        {
+                            Console.WriteLine("[ERROR] Problema de autenticación/autorización con la API de Gemini (401/403). Revise su clave API.");
+                            throw new ApplicationException("Error de autenticación con la API de Gemini (401/403).", new HttpRequestException($"Gemini 401/403: {apiResponse}"));
+                        }
+                        else
+                        {
+                            // Para cualquier otro error HTTP no exitoso
+                            throw new HttpRequestException($"La API de Gemini devolvió un estado no exitoso: {(int)response.StatusCode} {response.ReasonPhrase}");
+                        }
+                    }
+                
                     apiResponse = await response.Content.ReadAsStringAsync();
 
                     var geminiRootResponse = JsonSerializer.Deserialize<GeminiRootResponse>(apiResponse, _jsonSerializerOptions);
@@ -156,10 +184,10 @@ namespace RentaFijaApi.Services
 
                     }
                     }
-                catch (HttpRequestException ex)
+                catch (HttpRequestException ex) // Para errores de red subyacentes antes de obtener un StatusCode
                 {
-                    Console.WriteLine($"Error HTTP al llamar a la API de Gemini: {ex.Message}");
-                    throw; // Vuelve a lanzar la excepción para propagar el error
+                    Console.WriteLine($"[ERROR] Error de red al intentar conectar con la API de Gemini: {ex.Message}");
+                    throw new ApplicationException("Error de conexión al intentar comunicarse con la API de Gemini.", ex);
                 }
                 catch (System.Text.Json.JsonException ex)
                 {

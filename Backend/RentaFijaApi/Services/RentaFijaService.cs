@@ -176,13 +176,41 @@ public class RentaFijaService
     {
        Console.WriteLine($"[DEBUG] Iniciando proceso de extracción de datos. Parámetro tipoActivo recibido: '{tipoActivo ?? "null o vacío"}'");
 
-       // DateTime today = DateTime.Today; // Fecha de hoy (solo día, sin hora) para la comparación
-       DateTime today = new DateTime(2025, 7, 11); // Fecha de manual solo para testing
+        DateTime today = DateTime.Today; // Fecha de hoy (solo día, sin hora) para la comparación
+      // DateTime today = new DateTime(2025, 7, 11); // Fecha de manual solo para testing
 
 
         // --- Lógica de Cacheo ---
-        // Intenta obtener los datos de la caché para el día de hoy
-        RentaFijaReportResponse? cachedResponse = DataCache.GetCache(today);
+       
+        // 1. Primero, intentar encontrar el último informe disponible (sin importar si es de hoy o ayer).
+          PdfReportInfo? latestReportInfo = await FindPdfUrlFromDailyReportPageAsync();
+          DateTime actualReportDate;
+
+        if (latestReportInfo == null || string.IsNullOrEmpty(latestReportInfo.PdfUrl))
+        {
+            Console.WriteLine("[DEBUG] No se pudo encontrar la URL de ningún PDF de informe en el rango de búsqueda. Abortando.");
+            // Si no se encuentra ningún informe válido después de buscar 10 días,
+            // devolvemos una respuesta de fallo.
+            actualReportDate = DateTime.Today;
+            return new RentaFijaReportResponse
+            {
+                FechaInforme = actualReportDate, // Fallback si no se encontró NADA
+                Mensaje = "No se pudo encontrar la URL de ningún informe de renta fija en el rango de búsqueda."
+            };
+        }
+        else
+        {
+            //Asignamos la fecha encontrada a actualReportDate
+            actualReportDate = latestReportInfo.ReportDate;
+            Console.WriteLine($"[DEBUG] FindPdfUrlFromDailyReportPageAsync encontró: URL={latestReportInfo.PdfUrl} y Fecha={actualReportDate.ToShortDateString()}");
+        }
+        Console.WriteLine($"[DEBUG] el valor de actualReportDate después de encontrar la url: {actualReportDate}");
+
+
+            // 2. comparamos si el informe ya esta en la cache.
+
+            RentaFijaReportResponse? cachedResponse = DataCache.GetCache(latestReportInfo.ReportDate);
+
 
         if (cachedResponse != null)
         {
@@ -209,33 +237,9 @@ public class RentaFijaService
         // Si los datos no están en caché o no son de hoy, procede con la extracción completa
         Console.WriteLine("[DEBUG] Caché vacía o desactualizada. Procediendo a extraer nuevo informe.");
 
-        // 1. Encontrar la URL del PDF y la fecha del informe usando el DTO
-        PdfReportInfo? reportInfo = await FindPdfUrlFromDailyReportPageAsync();
-
-        // Variable para la fecha real del informe, inicializada con un fallback
-        DateTime actualReportDate;
-
-        if (reportInfo == null || string.IsNullOrEmpty(reportInfo.PdfUrl)) // Verifica si se encontró la info
-        {
-            Console.WriteLine("No se pudo encontrar la URL del PDF. Abortando extracción.");
-            actualReportDate = DateTime.Today; // Establece la fecha de fallback
-            return new RentaFijaReportResponse
-            {
-                FechaInforme = actualReportDate,
-                Mensaje = "No se pudo encontrar la URL del PDF del informe."
-            };
-        }
-        else
-        {
-            //Asignamos la fecha encontrada a actualReportDate
-            actualReportDate = reportInfo.ReportDate;
-            Console.WriteLine($"[DEBUG] FindPdfUrlFromDailyReportPageAsync encontró: URL={reportInfo.PdfUrl} y Fecha={actualReportDate.ToShortDateString()}");
-        }
-        Console.WriteLine($"[DEBUG] el valor de actualReportDate después de encontrar la url: {actualReportDate}");
-
-
+       
         // 2. Descargar el PDF
-        string pdfFilePath = await DownloadPdfAsync(reportInfo.PdfUrl);
+        string pdfFilePath = await DownloadPdfAsync(latestReportInfo.PdfUrl);
         if (string.IsNullOrEmpty(pdfFilePath))
         {
             Console.WriteLine("No se pudo descargar el PDF. Abortando extracción.");
@@ -254,7 +258,10 @@ public class RentaFijaService
 
         // 4. Enviar el texto a Gemini para la extracción inteligente de los datos
         Console.WriteLine("[DEBUG] Enviando texto a Gemini para interpretación.");
-        List<RentaFijaActivo> activos = await _geminiApiService.ExtractRentaFijaDataFromTextAsync(fullPdfText);
+
+
+        List<RentaFijaActivo> activos = 
+             await _geminiApiService.ExtractRentaFijaDataFromTextAsync(fullPdfText);
 
 
         //---OPTIMIZACIÓN: Filtrar por tipo de activo si se proporciona;
