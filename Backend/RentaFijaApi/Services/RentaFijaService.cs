@@ -13,14 +13,12 @@ public class RentaFijaService
     private readonly string _iamcReportsBaseUrl = "https://www.iamc.com.ar/Informe/";
     private readonly string _pdfFileName = "InformeDiarioIAMC.pdf"; // Nombre de archivo temporal
     private readonly IGeminiApiService _geminiApiService;
-
-    private readonly bool _useSimulation;
     public RentaFijaService(HttpClient httpClient, IPdfExtractionService pdfExtractionService, IGeminiApiService geminiApiService, bool useSimulation = false)
     {
         _httpClient = httpClient;
         _pdfExtractionService = pdfExtractionService;
         _geminiApiService = geminiApiService;
-        _useSimulation = useSimulation;
+        
     }
 
     // Este método ahora se encargará de encontrar la URL del PDF dentro de la página del informe
@@ -201,7 +199,7 @@ public class RentaFijaService
         else
         {
             //Asignamos la fecha encontrada a actualReportDate
-            actualReportDate = latestReportInfo.ReportDate;
+            actualReportDate = latestReportInfo.ReportDate.Date;
             Console.WriteLine($"[DEBUG] FindPdfUrlFromDailyReportPageAsync encontró: URL={latestReportInfo.PdfUrl} y Fecha={actualReportDate.ToShortDateString()}");
         }
         Console.WriteLine($"[DEBUG] el valor de actualReportDate después de encontrar la url: {actualReportDate}");
@@ -301,11 +299,24 @@ public class RentaFijaService
             Mensaje = activos != null && activos.Any() ? "Datos extraídos con éxito." : "No se encontraron activos o la extracción falló."
         };
 
+       // crear un DateTimeOffset con la fecha deseada a las 00:00:00 UTC
+    // y un offset de cero.
+    DateTimeOffset actualReportDateOffset = new DateTimeOffset(
+        latestReportInfo.ReportDate.Year,
+        latestReportInfo.ReportDate.Month,
+        latestReportInfo.ReportDate.Day,
+        0, 0, 0, // Hora 00:00:00
+        TimeSpan.Zero // Offset de 0, lo que lo hace UTC
+    );
+
+
         // --- Lógica de Cacheo (Guardar el informe completo) ---
         // Guardamos la respuesta completa (sin el filtro de tipoActivo aplicado, si lo hubo)
         // Esto permite que futuras peticiones con diferentes filtros usen la misma base cacheados.
-        DataCache.SetCache(finalResponse, actualReportDate);
+        DataCache.SetCache(finalResponse, actualReportDateOffset);
         // --- Fin Lógica de Cacheo ---
+
+
 
         return finalResponse;
     }

@@ -133,9 +133,9 @@ const AllAssets = () => {
 					>
 						Fecha Informe:{" "}
 						<Typography
-							variant="body1"
+							variant="h6"
 							component="span"
-							sx={{ fontWeight: "bold" }}
+							sx={{ fontWeight: "bold", fontStyle: "italic" }}
 						>
 							{dateReport}
 						</Typography>
