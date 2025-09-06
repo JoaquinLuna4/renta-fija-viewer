@@ -53,18 +53,19 @@ public class RentaFijaService
 
             // Formatea la fecha al formato "DDMMYY".
             // Esta variable debe estar dentro del bucle para que se actualice en cada iteración.
-            string dateSure = dateToTry.ToString("ddMMyy");
+            string dateFormatted = dateToTry.ToString("ddMMyyyy");
 
             // Construye la URL del informe diario basada en la fecha.
             // Esta variable también debe estar dentro del bucle.
-            string reportUrl = $"{_iamcReportsBaseUrl}InformeRentaFija{dateSure}/";
+            string reportUrl = $"{_iamcReportsBaseUrl}InformeLetrasyBonosdelTesoroyCaucion{dateFormatted}/";
 
-            Console.WriteLine($"[DEBUG] Intentando acceder a la página del informe para la fecha: {dateSure} ({reportUrl})");
+
+            Console.WriteLine($"[DEBUG] Intentando acceder a la página del informe para la fecha: {dateFormatted} ({reportUrl})");
 
             try
             {
                 HttpResponseMessage response = await _httpClient.GetAsync(reportUrl);
-                Console.WriteLine($"Respuesta del servidor para {dateSure}: {response.StatusCode}");
+                Console.WriteLine($"Respuesta del servidor para {dateFormatted}: {response.StatusCode}");
 
             
                 // IMPORTANTE: En lugar de EnsureSuccessStatusCode(), verifica si es exitoso.
@@ -89,7 +90,7 @@ public class RentaFijaService
 
                     if (pdfObjectElement == null)
                     {
-                        Console.WriteLine($"[DEBUG] El selector 'div.pdfVisualizador object' no encontró ningún elemento en la página para {dateSure}. Revisa el HTML o el selector. Saltando al día anterior.");
+                        Console.WriteLine($"[DEBUG] El selector 'div.pdfVisualizador object' no encontró ningún elemento en la página para {dateFormatted}. Revisa el HTML o el selector. Saltando al día anterior.");
                         // Si no se encuentra el elemento PDF, esta fecha no sirve, continuamos con el siguiente día.
                         continue;
                     }
@@ -97,12 +98,12 @@ public class RentaFijaService
                     string pdfUrl = pdfObjectElement.GetAttribute("data");
                     if (!string.IsNullOrEmpty(pdfUrl))
                     {
-                        Console.WriteLine($"[DEBUG] URL del PDF encontrada para {dateSure}: {pdfUrl}");
+                        Console.WriteLine($"[DEBUG] URL del PDF encontrada para {dateFormatted}: {pdfUrl}");
                         return new PdfReportInfo { PdfUrl = pdfUrl, ReportDate = dateToTry }; // ¡Éxito! Retorna la URL del PDF y termina la función.
                     }
                     else
                     {
-                        Console.WriteLine($"[DEBUG] Se encontró el elemento <object> para {dateSure}, pero su atributo 'data' es nulo o vacío. Saltando al día anterior.");
+                        Console.WriteLine($"[DEBUG] Se encontró el elemento <object> para {dateFormatted}, pero su atributo 'data' es nulo o vacío. Saltando al día anterior.");
                         // Si el atributo 'data' está vacío, la URL del PDF no es válida, continuamos.
                         continue;
                     }
@@ -110,7 +111,7 @@ public class RentaFijaService
                 else
                 {
                     // Si la respuesta no fue exitosa (ej. 404 Not Found), no hay informe para esta fecha.
-                    Console.WriteLine($"[DEBUG] No se encontró informe para la fecha: {dateSure}. Estado HTTP: {response.StatusCode}. Intentando fecha anterior.");
+                    Console.WriteLine($"[DEBUG] No se encontró informe para la fecha: {dateFormatted}. Estado HTTP: {response.StatusCode}. Intentando fecha anterior.");
                     continue; // Pasa a la siguiente iteración (día anterior).
                 }
 
@@ -118,12 +119,12 @@ public class RentaFijaService
             
             catch (HttpRequestException e)
             {
-                Console.WriteLine($"[DEBUG] Error HTTP al acceder a la página del informe para {dateSure}: {e.Message}. Intentando fecha anterior.");
+                Console.WriteLine($"[DEBUG] Error HTTP al acceder a la página del informe para {dateFormatted}: {e.Message}. Intentando fecha anterior.");
                 continue; // Si hay un error de red o de solicitud, continúa con el día anterior.
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[DEBUG] Error general al parsear la página del informe para {dateSure}: {ex.Message}. Intentando fecha anterior.");
+                Console.WriteLine($"[DEBUG] Error general al parsear la página del informe para {dateFormatted}: {ex.Message}. Intentando fecha anterior.");
                 continue; // Si hay cualquier otro error, continúa con el día anterior.
             }
         }
@@ -170,9 +171,9 @@ public class RentaFijaService
     }
 
     
-    public async Task<RentaFijaReportResponse> GetRentaFijaDataForTodayAsync(string? tipoActivo = null)
+    public async Task<RentaFijaReportResponse> GetRentaFijaDataForTodayAsync()
     {
-       Console.WriteLine($"[DEBUG] Iniciando proceso de extracción de datos. Parámetro tipoActivo recibido: '{tipoActivo ?? "null o vacío"}'");
+       Console.WriteLine($"[DEBUG] Iniciando proceso de extracción de datos.");
 
         DateTime today = DateTime.Today; // Fecha de hoy (solo día, sin hora) para la comparación
       // DateTime today = new DateTime(2025, 7, 11); // Fecha de manual solo para testing
@@ -207,26 +208,12 @@ public class RentaFijaService
 
             // 2. comparamos si el informe ya esta en la cache.
 
-            RentaFijaReportResponse? cachedResponse = DataCache.GetCache(latestReportInfo.ReportDate);
+            RentaFijaReportResponse? cachedResponse = DataCache.GetCache(actualReportDate);
 
 
         if (cachedResponse != null)
         {
             Console.WriteLine("[DEBUG] Sirviendo datos desde la caché para la fecha del informe: " + cachedResponse.FechaInforme.ToShortDateString());
-            // Si los datos están en caché y son para hoy, aplica el filtro y devuelve
-            if (!string.IsNullOrEmpty(tipoActivo))
-            {
-                List<RentaFijaActivo> filteredActivos = cachedResponse.Activos
-                    .Where(a => a.TipoActivo != null &&
-                                string.Equals(a.TipoActivo, tipoActivo, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-                return new RentaFijaReportResponse
-                {
-                    Activos = filteredActivos,
-                    FechaInforme = cachedResponse.FechaInforme,
-                    Mensaje = filteredActivos.Any() ? "Datos cacheados y filtrados con éxito." : "No se encontraron activos con el filtro en la caché."
-                };
-            }
             return cachedResponse; // Devuelve el informe completo desde la caché
         }
 
@@ -258,23 +245,11 @@ public class RentaFijaService
         Console.WriteLine("[DEBUG] Enviando texto a Gemini para interpretación.");
 
 
-        List<RentaFijaActivo> activos = 
+        List<LetrasTesoroDto> activos = 
              await _geminiApiService.ExtractRentaFijaDataFromTextAsync(fullPdfText);
 
 
-        //---OPTIMIZACIÓN: Filtrar por tipo de activo si se proporciona;
-        if (activos != null && activos.Any() && !string.IsNullOrEmpty(tipoActivo))
-        {
-            Console.WriteLine($"[DEBUG] Aplicando filtro por tipo de activo: '{tipoActivo}'");
-            // Filtra la lista de activos
-            activos = activos.Where(a =>
-                a.TipoActivo != null &&
-                string.Equals(a.TipoActivo, tipoActivo, StringComparison.OrdinalIgnoreCase)
-            ).ToList();
-
-            Console.WriteLine($"[DEBUG] Después del filtro, se encontraron {activos.Count} activos.");
-        }
-        //------FIN DE OPTIMIZACIÓN
+        // El filtrado por tipo de activo ha sido eliminado.
 
 
         // Eliminar el archivo PDF temporal después de procesar
@@ -294,26 +269,15 @@ public class RentaFijaService
         Console.WriteLine($"[DEBUG] Proceso de extracción finalizado. Se encontraron {activos.Count} activos.");
         RentaFijaReportResponse finalResponse = new RentaFijaReportResponse
         {
-            Activos = activos ?? new List<RentaFijaActivo>(),
+            Activos = activos ?? new List<LetrasTesoroDto>(),
             FechaInforme = actualReportDate,
             Mensaje = activos != null && activos.Any() ? "Datos extraídos con éxito." : "No se encontraron activos o la extracción falló."
         };
 
-       // crear un DateTimeOffset con la fecha deseada a las 00:00:00 UTC
-    // y un offset de cero.
-    DateTimeOffset actualReportDateOffset = new DateTimeOffset(
-        latestReportInfo.ReportDate.Year,
-        latestReportInfo.ReportDate.Month,
-        latestReportInfo.ReportDate.Day,
-        0, 0, 0, // Hora 00:00:00
-        TimeSpan.Zero // Offset de 0, lo que lo hace UTC
-    );
-
-
-        // --- Lógica de Cacheo (Guardar el informe completo) ---
+       // --- Lógica de Cacheo (Guardar el informe completo) ---
         // Guardamos la respuesta completa (sin el filtro de tipoActivo aplicado, si lo hubo)
         // Esto permite que futuras peticiones con diferentes filtros usen la misma base cacheados.
-        DataCache.SetCache(finalResponse, actualReportDateOffset);
+        DataCache.SetCache(finalResponse, actualReportDate);
         // --- Fin Lógica de Cacheo ---
 
 

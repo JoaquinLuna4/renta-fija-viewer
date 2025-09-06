@@ -4,6 +4,6 @@ namespace RentaFijaApi.Services
 {
     public interface IGeminiApiService
     {
-        Task<List<RentaFijaActivo>> ExtractRentaFijaDataFromTextAsync(string reportTextContent);
+        Task<List<LetrasTesoroDto>> ExtractRentaFijaDataFromTextAsync(string reportTextContent);
     }
 }

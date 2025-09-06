@@ -37,30 +37,42 @@ namespace RentaFijaApi.Services
         }
 
         // El método principal que recibe el texto y llama a Gemini
-        public async Task<List<RentaFijaActivo>> ExtractRentaFijaDataFromTextAsync(string reportTextContent)
+        public async Task<List<LetrasTesoroDto>> ExtractRentaFijaDataFromTextAsync(string reportTextContent)
         {
             // 2. Preparar el prompt para Gemini
-            string geminiPrompt = $@"Eres un asistente experto en análisis financiero y extracción de datos de informes de renta fija. Tu tarea es analizar el siguiente texto de un informe y extraer la información de los activos listados en las tablas,
-                                    específicamente para la sección de 'Renta Fija'. Solo debes analizar y extraer los datos de la hoja 2.
+            string geminiPrompt = $@"Eres un asistente experto en análisis financiero y extracción de datos. Tu tarea es analizar el siguiente texto de un informe de letras del tesoro y cauciones.
 
-                                    Para cada activo que encuentres, necesito los siguientes campos:
-                                    - **NombreCompleto**: El nombre completo del bono, que usualmente se encuentra a la izquierda del Ticker. En el documento figura en la columna BONO.
-                                    - **Ticker:** El código de identificación del activo (ej. 'T2X5', 'PNDCO').
-                                    - **Vencimiento:** La fecha de vencimiento del activo en formato AAAA-MM-DD (ej. '2025-05-23').
-                                    - **Cotización:** El precio de cotización del activo. Debe ser un número decimal, sin símbolos de moneda.
-                                    - **TIR Anual:** La Tasa Interna de Retorno anual, **que se encuentra bajo la columna 'TIR ANUAL' en el documento**. Debe ser un número decimal, sin el símbolo '%'. Generalmente se encuentra a la derecha de Paridad.
-                                    - **Paridad:** La paridad del activo, **que se encuentra bajo la columna 'PARIDAD' en el documento**. Debe ser un número decimal, sin el símbolo '%'.
+                                    **Reglas Clave de Extracción:**
+                                    * Para todos los campos numéricos, extrae el valor exacto como aparece en el texto.
+                                    * No realices conversiones matemáticas. Si el valor es 3.98%, debes extraerlo como 3.98. Si es 159.73, lo extraes como 159.73.
+                                    * Elimina cualquier símbolo como '%', '$', o comas de miles. Usa siempre un punto como separador decimal.
+                                    * Extrae la información campo por campo, asegurándote de que cada valor corresponde a su columna correcta.
 
-                                    Si un campo no se encuentra para un activo específico, por favor, devuélvelo como `null`.
-                                    Asegúrate de que todos los valores numéricos usen el punto como separador decimal.
+                                    Para cada activo que encuentres en las tablas, extrae la siguiente información:
+                                    - **Especie**: El nombre o código del activo (ej. 'LECAC', 'S30S5').
+                                    - **Fecha de Emisión**: La fecha en que se emitió el activo.
+                                    - **Fecha de Pago**: La fecha en que se espera el pago.
+                                    - **Plazo al Vto(Días)**: El número de días hasta el vencimiento.
+                                    - **Monto al Vto**: El monto total al vencimiento.
+                                    - **Tasa de licitación**: La tasa de licitación.
+                                    - **FechaCierre**: La fecha de cierre.
+                                    - **FechaLiquidacion**: La fecha de liquidación.
+                                    - **Precio ARS c/VN 100**: El precio en pesos por un valor nominal de 100.
+                                    - **Rendimientodel Período**: El rendimiento del activo en el período.
+                                    - **TNA**: La Tasa Nominal Anual.
+                                    - **TEA**: La Tasa Efectiva Anual.
+                                    - **TEM**: La Tasa Efectiva Mensual.
+                                    - **DM**: La duración de Macaulay.
 
-                                    La respuesta DEBE ser SOLAMENTE el array de objetos JSON. No incluyas ningún texto introductorio, explicaciones, ni bloques de código Markdown (```). Un maximo de 50 activos.
+                                    Si un campo no se encuentra para un activo, devuélvelo como `null`.
+
+                                    La respuesta DEBE ser SOLAMENTE un array de objetos JSON. No incluyas ningún texto introductorio, explicaciones, ni bloques de código Markdown (```).
 
                                     ---
 
                                     Texto del Informe:
                                     {reportTextContent}
-                                    ";
+                                    "; ; ;
 
             // 3. Llamar a la API de Gemini
             string jsonResponse = string.Empty;
@@ -147,7 +159,7 @@ namespace RentaFijaApi.Services
                     {
                         // Si la estructura no es la esperada, registra el error y maneja
                         Console.WriteLine("[ERROR] Estructura de respuesta de Gemini inesperada. No se encontraron candidatos.");
-                        return new List<RentaFijaActivo>();
+                        return new List<LetrasTesoroDto>();
                     }
 
                     if (rawExtractedJson != null)
@@ -208,28 +220,29 @@ namespace RentaFijaApi.Services
             }
 
 
-            // 4. Parsear la respuesta JSON de Gemini a tu lista de RentaFijaActivo DTOs
+            // 4. Parsear la respuesta JSON de Gemini a tu lista de LetrasTesoro DTOs
             try
             {
                 // Finalmente, deserializa la cadena JSON limpia a tu lista de DTOs
-                var activos = JsonSerializer.Deserialize<List<RentaFijaActivo>>(jsonResponse, _jsonSerializerOptions);
+                var activos = JsonSerializer.Deserialize<List<LetrasTesoroDto>>(jsonResponse, _jsonSerializerOptions);
+
                 if (activos != null)
                 {
-                    Console.WriteLine($"[DEBUG] Proceso de extracción finalizado. Se encontraron {activos.Count} activos.");
-                    foreach (var activo in activos)
-                    {
-                        AssignTipoActivo(activo); // Llama al método para asignar el tipo
-                    }
-                    return activos;
+                    Console.WriteLine($"[DEBUG] Deserialización exitosa. Se encontraron {activos.Count} activos.");
+                    return activos; // Devuelve la lista de activos deserializada
                 }
-                Console.WriteLine("[DEBUG] Deserialización a lista de activos resultó en null.");
-                return new List<RentaFijaActivo>();
+                else
+                {
+                    // Esto puede ocurrir si el JSON de entrada es literalmente la cadena "null"
+                    Console.WriteLine("[ERROR] La deserialización del JSON de activos ha resultado en null.");
+                    return new List<LetrasTesoroDto>(); // Devuelve una lista vacía en este caso
+                }
             }
             catch (JsonException ex)
             {
-                Console.WriteLine($"Error al deserializar la respuesta JSON de Gemini a DTOs: {ex.Message}");
-                Console.WriteLine($"JSON recibido (problema de deserialización final): {jsonResponse}"); // Registra el JSON limpio que falló
-                throw; // Vuelve a lanzar la excepción
+                Console.WriteLine($"[ERROR] Error al deserializar la respuesta JSON de Gemini a DTOs: {ex.Message}");
+                Console.WriteLine($"[DEBUG] JSON que causó el error: {jsonResponse}"); // Registra el JSON limpio que falló
+                throw; // Vuelve a lanzar la excepción para que el llamador sepa que algo salió mal
             }
         }
 
@@ -258,61 +271,6 @@ namespace RentaFijaApi.Services
                 return "[]"; // Retorna un array JSON vacío si no se encuentra el archivo
             }
         }
-        private void AssignTipoActivo(RentaFijaActivo asset)
-        {
-            if (asset == null || string.IsNullOrWhiteSpace(asset.CodigoTicker))
-            {
-                // Si no hay Ticker, no podemos clasificar bien, lo asignamos a "Otro" o lanzamos excepción
-                asset.TipoActivo = "Otro";
-                return;
-            }
-
-            if (asset.CodigoTicker.StartsWith("TX", StringComparison.OrdinalIgnoreCase) ||
-                (asset.NombreCompleto != null && asset.NombreCompleto.Contains("BONTE", StringComparison.OrdinalIgnoreCase)))
-            {
-                asset.TipoActivo = "BONTE";
-            }
-            else if (asset.CodigoTicker.StartsWith("AL", StringComparison.OrdinalIgnoreCase) ||
-                     asset.CodigoTicker.StartsWith("GD", StringComparison.OrdinalIgnoreCase) ||
-                     (asset.NombreCompleto != null && (asset.NombreCompleto.Contains("BONAR", StringComparison.OrdinalIgnoreCase) ||
-                                                     asset.NombreCompleto.Contains("GLOBAL", StringComparison.OrdinalIgnoreCase))))
-            {
-                asset.TipoActivo = "BONAR";
-            }
-            else if (asset.NombreCompleto != null && asset.NombreCompleto.Contains("BONOS DE CONSOLIDACION", StringComparison.OrdinalIgnoreCase))
-            {
-                asset.TipoActivo = "BONOS DE CONSOLIDACIÓN";
-            }
-            else if (asset.CodigoTicker.StartsWith("TZX", StringComparison.OrdinalIgnoreCase) ||
-                     (asset.NombreCompleto != null && asset.NombreCompleto.Contains("BONO TES. NAC.", StringComparison.OrdinalIgnoreCase) &&
-                                                     asset.NombreCompleto.Contains("CER", StringComparison.OrdinalIgnoreCase)))
-            {
-                asset.TipoActivo = "BONO TES. NAC. CER";
-            }
-            else if (asset.CodigoTicker.StartsWith("T", StringComparison.OrdinalIgnoreCase) &&
-                     (asset.NombreCompleto != null && asset.NombreCompleto.Contains("BONO CAP", StringComparison.OrdinalIgnoreCase)))
-            {
-                asset.TipoActivo = "BONOCAP";
-            }
-            else if (asset.CodigoTicker.StartsWith("S", StringComparison.OrdinalIgnoreCase) &&
-                     (asset.NombreCompleto != null && asset.NombreCompleto.Contains("LECAP", StringComparison.OrdinalIgnoreCase)))
-            {
-                asset.TipoActivo = "LECAP";
-            }
-            else if (asset.NombreCompleto != null && asset.NombreCompleto.Contains("BOPREAL", StringComparison.OrdinalIgnoreCase))
-            {
-                asset.TipoActivo = "BOPREAL";
-            }
-            else if ((asset.NombreCompleto != null && (asset.NombreCompleto.Contains("O.N.", StringComparison.OrdinalIgnoreCase) ||
-                                                     asset.NombreCompleto.Contains("OBLIGACION NEGOCIABLE", StringComparison.OrdinalIgnoreCase))) ||
-                     (asset.CodigoTicker != null && Regex.IsMatch(asset.CodigoTicker, @"[OV]$", RegexOptions.IgnoreCase)))
-            {
-                asset.TipoActivo = "OBLIGACION NEGOCIABLE";
-            }
-            else
-            {
-                asset.TipoActivo = "Otro";
-            }
-        }
+      
     }
 }

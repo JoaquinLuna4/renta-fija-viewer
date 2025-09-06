@@ -17,16 +17,14 @@ public class RentaFijaController : ControllerBase
         }
 
         [HttpGet()]
-        public async Task<ActionResult<List<RentaFijaActivo>>> GetRentaFijaData(
-         [FromQuery]
-        string? tipoActivo = null)
+        public async Task<ActionResult<RentaFijaReportResponse>> GetRentaFijaData()
         {
-        RentaFijaReportResponse response = await _rentaFijaService.GetRentaFijaDataForTodayAsync(tipoActivo);
+            RentaFijaReportResponse response = await _rentaFijaService.GetRentaFijaDataForTodayAsync();
 
             if (response == null || response.Activos.Count == 0)
             {
-            return NotFound(response?.Mensaje ?? "No se encontraron datos de renta fija.");
-        }
+                return NotFound(response?.Mensaje ?? "No se encontraron datos de renta fija.");
+            }
 
             return Ok(response);
         }
