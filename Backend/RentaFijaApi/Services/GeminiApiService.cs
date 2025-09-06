@@ -58,7 +58,7 @@ namespace RentaFijaApi.Services
                                     - **FechaCierre**: La fecha de cierre.
                                     - **FechaLiquidacion**: La fecha de liquidación.
                                     - **Precio ARS c/VN 100**: El precio en pesos por un valor nominal de 100.
-                                    - **Rendimientodel Período**: El rendimiento del activo en el período.
+                                    - **Rendimiento del Período**: El rendimiento del activo en el período.
                                     - **TNA**: La Tasa Nominal Anual.
                                     - **TEA**: La Tasa Efectiva Anual.
                                     - **TEM**: La Tasa Efectiva Mensual.

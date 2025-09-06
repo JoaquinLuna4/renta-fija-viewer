@@ -36,7 +36,7 @@ public class LetrasTesoroDto
     [JsonConverter(typeof(StringToDoubleConverter))]
     public double? PrecioArsCvn100 { get; set; }
 
-    [JsonPropertyName("Rendimientodel Período")]
+    [JsonPropertyName("Rendimiento del Período")]
     [JsonConverter(typeof(StringToDoubleConverter))]
     public double? RendimientoDelPeriodo { get; set; }
 
