@@ -2,12 +2,14 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "../components/Layout";
 import Home from "../views/Home";
 import AllAssets from "../views/AllAssets";
+import About from "../views/About";
 function AppRoutes() {
 	return (
 		<Routes>
 			<Route element={<Layout />}>
 				<Route path="/" element={<Home />} />
 				<Route path="/allAssets" element={<AllAssets />} />
+				<Route path="/about" element={<About />} />
 			</Route>
 			{/* <Route path="/success" element={<Success />} />
 			<Route path="/login" element={<Login />} /> */}

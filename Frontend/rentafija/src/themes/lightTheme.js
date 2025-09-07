@@ -13,13 +13,13 @@ const lightTheme = createTheme({
 			main: knicksOrange, // El naranja será el color primario
 			light: "#FF994C", // Un naranja más claro
 			dark: "#D16F00", // Un naranja más oscuro
-			contrastText: "#fff", // Texto en blanco sobre el naranja
+			contrastText: "#efefef", // Texto en blanco sobre el naranja
 		},
 		secondary: {
 			main: knicksBlue, // El azul será el color secundario
 			light: "#3388D1", // Un azul más claro para estados hover/active
 			dark: "#004C8A", // Un azul más oscuro
-			contrastText: "#fff", // Texto en blanco sobre el azul
+			contrastText: (theme) => theme.palette.primary.contrastText, // Usa el mismo contraste que el primario
 		},
 		error: {
 			main: "#D32F2F", // Color de error estándar de Material-UI

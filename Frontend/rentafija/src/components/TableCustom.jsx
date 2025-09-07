@@ -9,15 +9,7 @@ import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
-import Checkbox from "@mui/material/Checkbox";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
-
 import { visuallyHidden } from "@mui/utils";
 
 // --- Funciones auxiliares para ordenamiento de la tabla ---
@@ -51,26 +43,37 @@ function EnhancedTableHead(props) {
 				position: "sticky",
 				top: 0,
 				zIndex: 1,
+				backgroundColor: "background.paper",
 			}}
 		>
 			<TableRow>
 				{headCells.map((headCell) => (
 					<TableCell
 						key={headCell.id}
-						align={"center"}
+						align={headCell.numeric ? "right" : "left"}
 						sortDirection={orderBy === headCell.id ? order : false}
 						sx={{
-							backgroundColor: "background.paper", // Usa el color de fondo del Paper del tema
+							backgroundColor: "background.paper",
 							color: "text.primary",
-							fontSize: "1.1rem",
-							margin: 0,
-							padding: 0,
+							fontWeight: "bold",
+							fontSize: "0.85rem",
+							padding: "8px 12px",
+							whiteSpace: "nowrap",
+							width: headCell.width ? `${headCell.width}px` : "auto",
+							minWidth: headCell.width ? `${headCell.width}px` : "auto",
+							borderBottom: "2px solid",
+							borderColor: "divider",
 						}}
 					>
 						<TableSortLabel
 							active={orderBy === headCell.id}
 							direction={orderBy === headCell.id ? order : "asc"}
 							onClick={createSortHandler(headCell.id)}
+							sx={{
+								"&:hover": {
+									color: "primary.main",
+								},
+							}}
 						>
 							{headCell.label}
 							{orderBy === headCell.id ? (
@@ -127,11 +130,9 @@ EnhancedTableToolbar.propTypes = {
 // Recibe 'rows' (datos de la API) y 'headCells' (la definición de las columnas) como props
 export default function EnhancedTable({ rows, headCells }) {
 	const [order, setOrder] = React.useState("asc");
-	// Establece el 'orderBy' inicial al 'id' de la primera columna si existe
 	const [orderBy, setOrderBy] = React.useState(headCells[0]?.id || "");
 	const [page, setPage] = React.useState(0);
-
-	const [rowsPerPage, setRowsPerPage] = React.useState(5);
+	const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
 	const handleRequestSort = (event, property) => {
 		const isAsc = orderBy === property && order === "asc";
@@ -145,7 +146,25 @@ export default function EnhancedTable({ rows, headCells }) {
 
 	const handleChangeRowsPerPage = (event) => {
 		setRowsPerPage(parseInt(event.target.value, 10));
-		setPage(0); // Reinicia la página a 0 cuando cambian las filas por página
+		setPage(0);
+	};
+
+	// Función para formatear el valor de la celda según la definición de la columna
+	const formatCellValue = (value, headCell) => {
+		if (value === null || value === undefined) return "";
+		if (headCell.format && typeof headCell.format === "function") {
+			try {
+				return headCell.format(value);
+			} catch (error) {
+				console.error(
+					`Error formateando valor para ${headCell.id}:`,
+					value,
+					error
+				);
+				return value;
+			}
+		}
+		return value;
 	};
 
 	// Calcula las filas vacías para evitar saltos de diseño en la última página
@@ -155,41 +174,67 @@ export default function EnhancedTable({ rows, headCells }) {
 	// Filtra y ordena las filas visibles
 	const visibleRows = React.useMemo(
 		() =>
-			[...rows] // Crea una copia para evitar mutar el array original
+			[...rows]
 				.sort(getComparator(order, orderBy))
 				.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-		[order, orderBy, page, rowsPerPage, rows] // Dependencias: recalcula si cambian
+		[order, orderBy, page, rowsPerPage, rows]
+	);
+
+	// Calcula el ancho total de la tabla
+	const tableWidth = headCells.reduce(
+		(acc, cell) => acc + (cell.width || 120),
+		0
 	);
 
 	return (
-		<Box sx={{ width: "100%" }}>
-			<Paper sx={{ width: "100%", mb: 2, borderRadius: 2 }}>
-				{/* <EnhancedTableToolbar /> */}
-				<TableContainer sx={{ maxHeight: 440 }}>
-					<Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
+		<Box sx={{ width: "100%", overflow: "auto" }}>
+			<Paper sx={{ width: "100%", mb: 2, borderRadius: 2, overflow: "hidden" }}>
+				<TableContainer
+					sx={{
+						maxHeight: "calc(100vh - 200px)",
+						width: "100%",
+						margin: "0 auto",
+						padding: "0 16px",
+					}}
+				>
+					<Table
+						stickyHeader
+						aria-labelledby="tableTitle"
+						sx={{
+							minWidth: Math.max(tableWidth, "100%"),
+							tableLayout: "auto",
+						}}
+					>
 						<EnhancedTableHead
 							order={order}
 							orderBy={orderBy}
 							onRequestSort={handleRequestSort}
 							rowCount={rows.length}
-							headCells={headCells} // Pasa la definición de las columnas
+							headCells={headCells}
 						/>
 						<TableBody>
-							{visibleRows.map((row) => {
-								// Cada fila necesita una 'key' única, usamos 'row.id' que ya procesamos
-								return (
-									<TableRow
-										hover
-										tabIndex={-1}
-										key={row.id}
-										sx={{ cursor: "pointer" }}
-									>
-										{/* Itera sobre headCells para renderizar las celdas de cada fila */}
-										{headCells.map((headCell) => (
+							{visibleRows.map((row) => (
+								<TableRow
+									hover
+									tabIndex={-1}
+									key={row.id}
+									sx={{
+										"&:nth-of-type(odd)": {
+											backgroundColor: "action.hover",
+										},
+										"&:hover": {
+											backgroundColor: "action.selected",
+										},
+									}}
+								>
+									{headCells.map((headCell) => {
+										const cellValue = row[headCell.id];
+										const formattedValue = formatCellValue(cellValue, headCell);
+
+										return (
 											<TableCell
-												key={`${row.id}-${headCell.id}`} // Clave única para cada celda
+												key={`${row.id}-${headCell.id}`}
 												align={headCell.numeric ? "right" : "left"}
-												// La primera columna (Bono) puede ser un <th> semánticamente
 												component={
 													headCell.id === headCells[0].id ? "th" : "td"
 												}
@@ -197,40 +242,49 @@ export default function EnhancedTable({ rows, headCells }) {
 													headCell.id === headCells[0].id ? "row" : undefined
 												}
 												sx={{
-													backgroundColor: "background.paper", // Usa el color de fondo del Paper del tema
-													color: "text.primary",
-													fontSize: "1rem",
-													margin: 0,
-													padding: "10px 20px",
+													fontSize: "0.85rem",
+													padding: "8px 12px",
+													whiteSpace: "nowrap",
+													width: headCell.width
+														? `${headCell.width}px`
+														: "auto",
+													minWidth: headCell.width
+														? `${headCell.width}px`
+														: "auto",
+													borderBottom: "1px solid rgba(224, 224, 224, 0.5)",
 												}}
 											>
-												{/* Accede al valor de la fila usando el 'id' de la headCell */}
-												{row[headCell.id]}
+												{formattedValue}
 											</TableCell>
-										))}
-									</TableRow>
-								);
-							})}
+										);
+									})}
+								</TableRow>
+							))}
 							{emptyRows > 0 && (
-								<TableRow>
-									<TableCell colSpan={headCells.length} />{" "}
+								<TableRow style={{ height: 53 * emptyRows }}>
+									<TableCell colSpan={headCells.length} />
 								</TableRow>
 							)}
 						</TableBody>
 					</Table>
 				</TableContainer>
 				<TablePagination
-					rowsPerPageOptions={[5, 10, 25, 50, 100]}
+					rowsPerPageOptions={[10, 25, 50, 100]}
 					component="div"
-					labelRowsPerPage={null}
 					count={rows.length}
 					rowsPerPage={rowsPerPage}
 					page={page}
 					onPageChange={handleChangePage}
 					onRowsPerPageChange={handleChangeRowsPerPage}
 					sx={{
-						fontSize: "0.875rem",
+						"& .MuiTablePagination-toolbar": {
+							padding: "8px 16px",
+						},
 					}}
+					labelRowsPerPage="Filas por página:"
+					labelDisplayedRows={({ from, to, count }) =>
+						`${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`
+					}
 				/>
 			</Paper>
 		</Box>

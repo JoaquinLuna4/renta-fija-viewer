@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-
+import Navbar from "./Navbar";
 import FooterMui from "./FooterMui";
 import { Box } from "@mui/material";
 function Layout() {
@@ -11,7 +11,7 @@ function Layout() {
 				minHeight: "100vh",
 			}}
 		>
-			{/* <Navbar /> */} {/* Uncomment if you want to use the Navbar */}
+			<Navbar />
 			<Box component="main" sx={{ flexGrow: 1 }}>
 				<Outlet />
 			</Box>

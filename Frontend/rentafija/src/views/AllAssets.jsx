@@ -1,42 +1,107 @@
 import React from "react";
 import { useState, useEffect, useMemo } from "react";
 import EnhancedTable from "../components/TableCustom";
-import { GridTable } from "../components/GridTable";
-import { Container, Paper, Box, TextField, Typography } from "@mui/material";
+import { Container, Paper, Box, Typography, TextField } from "@mui/material";
+import Navbar from "../components/Navbar";
 import { fetchAssets } from "../services/assetsService";
 import Loading from "../components/Loading";
 import formatDate from "../utils/formatDate";
 
-// Definición de headCells para tus datos de bonos
+// Definición de headCells para los datos de bonos
 // El 'id' de cada headCell DEBE coincidir con la clave de la propiedad en los objetos de datos (rows)
 const headCells = [
 	{
-		id: "nombreCompleto",
+		id: "Especie",
 		numeric: false,
-
-		label: "Bono",
+		label: "Especie",
+		width: 150,
 	},
-	{ id: "tipoActivo", numeric: false, label: "Tipo activo" },
-	{ id: "Ticker", numeric: false, label: "Ticker" },
 	{
-		id: "Vencimiento",
+		id: "Tasa de licitación",
+		numeric: true,
+		label: "Tasa de Licitación",
+		width: 120,
+		format: (value) => `${Number(value).toFixed(2)}%`,
+	},
+	{
+		id: "Precio ARS c/VN 100",
+		numeric: true,
+		label: "Precio",
+		width: 100,
+		format: (value) => `$${Number(value).toFixed(2)}`,
+	},
+	{
+		id: "Rendimiento del Período",
+		numeric: true,
+		label: "Rend. Período",
+		width: 120,
+		format: (value) => `${Number(value).toFixed(2)}%`,
+	},
+	{
+		id: "TNA",
+		numeric: true,
+		label: "TNA",
+		width: 100,
+		format: (value) => `${Number(value).toFixed(2)}%`,
+	},
+	{
+		id: "TEA",
+		numeric: true,
+		label: "TEA",
+		width: 100,
+		format: (value) => `${Number(value).toFixed(2)}%`,
+	},
+	{
+		id: "TEM",
+		numeric: true,
+		label: "TEM",
+		width: 100,
+		format: (value) => `${Number(value).toFixed(2)}%`,
+	},
+	{
+		id: "DM",
+		numeric: true,
+		label: "Duración Mod.",
+		width: 120,
+		format: (value) => Number(value).toFixed(2),
+	},
+	/*{
+		id: "Plazo al Vto(Días)",
+		numeric: true,
+		label: "Días al Vto",
+		width: 100,
+	},*/
+	{
+		id: "Monto al Vto",
+		numeric: true,
+		label: "Monto Vto.",
+		width: 120,
+		format: (value) => `$${Number(value).toLocaleString("es-AR")}`,
+	},
+	{
+		id: "Fecha de Emisión",
 		numeric: false,
-
-		label: "Vencimiento",
+		label: "Emisión",
+		width: 100,
 	},
 	{
-		id: "Cotización",
-		numeric: true,
-
-		label: "Cotización",
+		id: "Fecha de Pago",
+		numeric: false,
+		label: "Pago",
+		width: 100,
 	},
 	{
-		id: "TIR Anual",
-		numeric: true,
-
-		label: "TIR Anual (%)",
+		id: "FechaCierre",
+		numeric: false,
+		label: "Cierre",
+		width: 100,
 	},
-	{ id: "Paridad", numeric: true, label: "Paridad" },
+	{
+		id: "FechaLiquidacion",
+		numeric: false,
+		label: "Liquidación",
+		width: 100,
+	},
 ];
 
 const AllAssets = () => {
@@ -99,83 +164,83 @@ const AllAssets = () => {
 	// 	{ field: "Cotización", headerName: "Cotización", width: 150 },
 	// 	{ field: "TIR Anual", headerName: "TIR Anual", width: 150 },
 	// 	{ field: "Paridad", headerName: "Paridad", width: 150 },
-	// 	{
-	// 		field: "Fecha Ultima Cotizacion",
-	// 		headerName: "Fecha Ultima Cotizacion",
-	// 		width: 150,
-	// 	},
-	// ]
-	// const rows = [
-	// 	{ id: 1, name: "Asset 1", value: 100 },
-	// 	{ id: 2, name: "Asset 2", value: 200 },
-	// 	{ id: 3, name: "Asset 3", value: 300 },
-	// ];
-
 	return (
-		<Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-			<Typography
-				variant="h4"
-				color="text.secondary"
-				component="h1"
-				gutterBottom
-				align="center"
-			>
-				Activos de Renta Fija
-			</Typography>
-			<Paper elevation={3} sx={{ padding: 2, borderRadius: 2 }}>
-				<Box>
-					<Typography
-						variant="h5"
-						component="h2"
-						gutterBottom
-						align="right"
-						sx={{ mb: 2, color: "text.primary" }}
-					>
-						Fecha Informe:{" "}
+		<>
+			<Container maxWidth={false} sx={{ mt: 4, mb: 4, width: "95%" }}>
+				<Typography
+					variant="h3"
+					component="h1"
+					gutterBottom
+					align="center"
+					sx={{
+						background: (theme) => theme.palette.primary.contrastText,
+						"& *": {
+							color: "inherit",
+						},
+						WebkitBackgroundClip: "text",
+						WebkitTextFillColor: "transparent",
+						fontWeight: 700,
+						letterSpacing: ".2rem",
+						mb: 4,
+					}}
+				>
+					Activos de Renta Fija
+				</Typography>
+				<Paper
+					elevation={3}
+					sx={{
+						padding: 3,
+						borderRadius: 2,
+						width: "100%",
+						maxWidth: "100%",
+						overflowX: "auto",
+					}}
+				>
+					<Box>
 						<Typography
-							variant="h6"
-							component="span"
-							sx={{ fontWeight: "bold", fontStyle: "italic" }}
+							variant="h5"
+							component="h2"
+							gutterBottom
+							align="right"
+							sx={{ mb: 2, color: "text.primary" }}
 						>
-							{dateReport}
+							Fecha Informe:{" "}
+							<Typography
+								variant="h6"
+								component="span"
+								sx={{ fontWeight: "bold", fontStyle: "italic" }}
+							>
+								{dateReport}
+							</Typography>
 						</Typography>
-					</Typography>
-				</Box>
-				<TextField
-					fullWidth
-					label="Bono , Ticker, Vencimiento..."
-					variant="outlined"
-					value={searchTerm}
-					onChange={handleSearchChange}
-					sx={{ mb: 3 }}
-				/>
-
-				{loading ? (
-					<Box
-						sx={{
-							display: "flex",
-							justifyContent: "center",
-							alignItems: "center",
-							height: 300,
-							width: "100%",
-						}}
-					>
-						<Loading />
 					</Box>
-				) : (
-					<EnhancedTable
-						rows={filteredRows}
-						headCells={headCells}
-						// ------- Definicion de props para DataGrid de Mui -----  //
-						// rows={rowsState}
-						// columns={columns}
-						// pageSizeOptions={[5, 10, 20]}
-						// paginationModel={{ page: 0, pageSize: 10 }}
+					<TextField
+						fullWidth
+						label="Especie , TNA, Vencimiento..."
+						variant="outlined"
+						value={searchTerm}
+						onChange={handleSearchChange}
+						sx={{ mb: 3 }}
 					/>
-				)}
-			</Paper>
-		</Container>
+
+					{loading ? (
+						<Box
+							sx={{
+								display: "flex",
+								justifyContent: "center",
+								alignItems: "center",
+								height: 300,
+								width: "100%",
+							}}
+						>
+							<Loading />
+						</Box>
+					) : (
+						<EnhancedTable rows={filteredRows} headCells={headCells} />
+					)}
+				</Paper>
+			</Container>
+		</>
 	);
 };
-
 export default AllAssets;
