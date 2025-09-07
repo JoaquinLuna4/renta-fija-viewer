@@ -3,8 +3,8 @@ import { blueGrey } from "@mui/material/colors";
 
 const knicksBlue = "#006BB6"; // Azul principal de los Knicks
 const knicksOrange = "#F58426"; // Naranja principal de los Knicks
-const knicksSilver = "#BEC0C2"; // Gris para detalles
-const knicksBlack = "#000000"; // Negro para texto
+// const knicksSilver = "#BEC0C2"; // Gris para detalles
+// const knicksBlack = "#000000"; // Negro para texto
 
 const lightTheme = createTheme({
 	palette: {
