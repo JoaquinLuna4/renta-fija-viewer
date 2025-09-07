@@ -41,7 +41,7 @@ Para correr este proyecto de forma local, necesitarás tener instalado .NET SDK,
 ### 1. Clonar el Repositorio
 
 ```bash
-git clone https://github.com/tu-usuario/RentaFija.git
+git clone https://github.com/JoaquinLuna4/renta-fija-viewer.git
 cd RentaFija
 ```
 
