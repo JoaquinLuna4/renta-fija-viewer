@@ -110,7 +110,7 @@ namespace RentaFijaApi.Services
                     // Asegúrate de usar la región correcta (ej. us-central1) y tu project ID
 
                     //Generando la url completa
-                    string fullApiUrl = $"{_geminiApiUrl}/models/gemini-1.5-flash:generateContent?key={_geminiApiKey}";
+                    string fullApiUrl = $"{_geminiApiUrl}/models/gemini-2.5-flash:generateContent?key={_geminiApiKey}";
 
                     Console.WriteLine($"[DEBUG] Enviando solicitud a Gemini API: {fullApiUrl}");
 
