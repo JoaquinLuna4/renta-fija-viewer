@@ -22,5 +22,11 @@
 *.cache
 */cache/ # Para carpetas llamadas 'cache' en cualquier directorio
 
-
 *.txt
+
+# Images
+*.png
+*.webp
+*.jpg
+*.jpeg
+*.gif
